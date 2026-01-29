@@ -3,7 +3,7 @@
 A modern, high-performance FHIRPath implementation in TypeScript - designed as a drop-in replacement for `fhirpath.js` with significant performance improvements.
 
 **Version:** 0.7.6  
-**Tests:** 580+ test cases (including official HL7 FHIRPath test suite)  
+**Tests:** 602 test cases (including official HL7 FHIRPath test suite)  
 **License:** MIT
 
 ---
@@ -60,6 +60,8 @@ The standard `fhirpath.js` library (HL7/fhirpath.js) is the reference implementa
 | **aggregate()** | ✅ | ✅ Full $total/$this support |
 | **resolve()** | ✅ | ✅ Bundle + custom resolver |
 | **htmlChecks()** | ✅ | ✅ XHTML security validation |
+| **inspect()** | ❌ | ✅ Debug with traces & timing |
+| **registry** | ❌ | ✅ Function/operator introspection |
 
 ### API Compatibility
 
@@ -1417,6 +1419,21 @@ deno test -A --coverage packages/fhirpath-atollee/tests/
   - Type-aware evaluation with selected model
   - Cached FhirPathEngine instances per version
   - Affects `is`, `as`, `ofType` type checking
+
+### Completed (v0.7.6)
+- [x] **Inspect API** - Debug FHIRPath expressions
+  - `inspect()` captures trace() calls with timing
+  - Execution time measurement
+  - AST inspection
+  - `formatTraces()` helper for console output
+  - `createInspector()` factory for reusable inspectors
+- [x] **Registry API** - Function & operator introspection
+  - `registry.listFunctions()` - 64 functions with metadata
+  - `registry.listOperators()` - 23 operators
+  - Filter by category, specVersion
+  - Search functions by name/description
+  - Useful for autocomplete, documentation, tooling
+- [x] 602 tests (+22 for new APIs)
 
 ---
 
