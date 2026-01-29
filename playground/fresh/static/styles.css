@@ -244,6 +244,13 @@ body {
   outline-offset: 2px;
 }
 
+/* Remove focus-visible outline for inputs that have their own ring styling */
+textarea:focus-visible,
+input:focus-visible,
+.monaco-editor *:focus-visible {
+  outline: none;
+}
+
 /* Smooth transitions */
 button, a, .transition-theme {
   transition: all 0.2s ease;
