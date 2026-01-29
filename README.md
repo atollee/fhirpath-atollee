@@ -695,10 +695,6 @@ deno task build
 # Deploy the `dist/` folder to any static host
 ```
 
-**Hosted Playground:**
-- **GitHub Pages:** https://atollee.github.io/fhirpath-atollee/
-- **GitLab Pages:** https://fhir.atollee.com/fhirpath-atollee/
-
 **Client-Side Architecture:**
 The client-side playground loads `fhirpath-atollee` directly in the browser via ESM:
 
@@ -715,8 +711,7 @@ Until then, the playground uses the Fresh API for evaluation when running locall
 **Client-Side Features:**
 - Pure static deployment (no server required)
 - Vite + Preact build (~46KB JS, ~18KB CSS gzipped)
-- ESM import from JSR: `jsr:@atollee/fhirpath-atollee`
-- GitHub Pages ready via `.github/workflows/deploy-playground.yml`
+- Can be deployed to any static hosting (CDN, S3, Vercel, Netlify)
 
 #### Option 3: Web Component (Embeddable)
 
