@@ -1,5 +1,6 @@
 import { define } from "../utils.ts";
 import PlaygroundIsland from "../islands/PlaygroundIsland.tsx";
+import { PageHeader, FeatureCards } from "../islands/TranslatedContent.tsx";
 import { createDefaultAPI } from "../../../src/api.ts";
 import { analyzeExpression } from "../../../src/optimizer/mod.ts";
 
@@ -63,23 +64,8 @@ export default define.page(function PlaygroundPage({ url }) {
 
   return (
     <div>
-      {/* SEO-optimized header with server-rendered content */}
-      <div class="mb-4 sm:mb-6">
-        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">
-          FHIRPath Playground
-        </h1>
-        <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">
-          Interactive FHIRPath expression tester with live evaluation, AST visualization, 
-          optimization hints, and JIT compiler support. Powered by{" "}
-          <a 
-            href="https://github.com/atollee/fhirpath-atollee" 
-            class="link-atollee hover:underline font-medium"
-          >
-            fhirpath-atollee
-          </a>
-          {" "}— up to 75x faster than fhirpath.js.
-        </p>
-      </div>
+      {/* Translated header (Island) */}
+      <PageHeader />
 
       {/* Server-rendered preview for SEO */}
       <noscript>
@@ -109,36 +95,8 @@ export default define.page(function PlaygroundPage({ url }) {
         initialError={initialError}
       />
 
-      {/* Info Section (server-rendered for SEO) */}
-      <div class="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4">
-          <h3 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-            <span class="text-atollee-ocean">🚀</span> High Performance
-          </h3>
-          <p class="text-sm text-slate-600 dark:text-slate-400">
-            JIT compiler delivers 50-75x faster execution than fhirpath.js. 
-            Native TypeScript parser with zero external dependencies.
-          </p>
-        </div>
-        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4">
-          <h3 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-            <span class="text-atollee-orange">💡</span> Smart Optimization
-          </h3>
-          <p class="text-sm text-slate-600 dark:text-slate-400">
-            Real-time hints suggest improvements like using exists() instead of count() {">"} 0. 
-            Complexity scoring helps identify expensive expressions.
-          </p>
-        </div>
-        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:col-span-2 lg:col-span-1">
-          <h3 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-            <span class="text-atollee-sea">📋</span> History & Favorites
-          </h3>
-          <p class="text-sm text-slate-600 dark:text-slate-400">
-            Copy expressions to clipboard. History and favorites persist locally. 
-            Perfect for documentation and debugging.
-          </p>
-        </div>
-      </div>
+      {/* Translated feature cards (Island) */}
+      <FeatureCards />
     </div>
   );
 });
