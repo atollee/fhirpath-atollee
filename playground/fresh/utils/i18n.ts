@@ -57,7 +57,9 @@ export interface Translations {
     noHints: string;
     complexity: string;
     jit: string;
+    jitTooltip: string;
     interpreter: string;
+    interpreterTooltip: string;
     noJit: string;
     fhirRelease: string;
     fhirReleaseTooltip: string;
@@ -101,22 +103,22 @@ export const translations: Record<Language, Translations> = {
     },
     headings: {
       title: "FHIRPath Playground",
-      subtitle: "Interactive FHIRPath expression tester with live evaluation, AST visualization, optimization hints, and JIT compiler support. Powered by fhirpath-atollee — up to 25x faster than fhirpath.js with JIT.",
+      subtitle: "Interactive FHIRPath expression tester with live evaluation and AST visualization. Powered by fhirpath-atollee.",
       resource: "Resource (JSON)",
       expression: "Expression",
     },
     features: {
       performance: {
-        title: "High Performance",
-        description: "JIT compiler delivers up to 25x faster execution than fhirpath.js (12x average). Native TypeScript parser with AST caching.",
+        title: "JIT Compiler",
+        description: "Native TypeScript with optional JIT compilation and AST caching.",
       },
       optimization: {
-        title: "Smart Optimization",
-        description: "Real-time hints suggest improvements like using exists() instead of count() > 0. Complexity scoring helps identify expensive expressions.",
+        title: "Optimization Hints",
+        description: "Real-time suggestions and complexity scoring.",
       },
       history: {
         title: "History & Favorites",
-        description: "Copy expressions to clipboard. History and favorites persist locally. Perfect for documentation and debugging.",
+        description: "Clipboard, local history, and favorites.",
       },
     },
     playground: {
@@ -135,8 +137,10 @@ export const translations: Record<Language, Translations> = {
       empty: "(empty)",
       noHints: "No optimization suggestions",
       complexity: "Complexity",
-      jit: "JIT",
-      interpreter: "Interpreter",
+      jit: "JIT (compiled)",
+      jitTooltip: "Just-In-Time compiled: Expression is converted to optimized native code for maximum performance",
+      interpreter: "Interpreted",
+      interpreterTooltip: "Interpreted execution: Expression is evaluated step-by-step (used for complex expressions)",
       noJit: "No JIT",
       fhirRelease: "FHIR",
       fhirReleaseTooltip: "FHIR version for type checking (is/as/ofType)",
@@ -175,22 +179,22 @@ export const translations: Record<Language, Translations> = {
     },
     headings: {
       title: "FHIRPath Playground",
-      subtitle: "Interaktiver FHIRPath-Ausdruckstester mit Live-Auswertung, AST-Visualisierung, Optimierungshinweisen und JIT-Compiler-Unterstützung. Powered by fhirpath-atollee — bis zu 25x schneller als fhirpath.js mit JIT.",
+      subtitle: "Interaktiver FHIRPath-Ausdruckstester mit Live-Auswertung und AST-Visualisierung. Powered by fhirpath-atollee.",
       resource: "Ressource (JSON)",
       expression: "Ausdruck",
     },
     features: {
       performance: {
-        title: "Hohe Leistung",
-        description: "JIT-Compiler liefert bis zu 25x schnellere Ausführung als fhirpath.js (12x im Durchschnitt). Nativer TypeScript-Parser mit AST-Caching.",
+        title: "JIT-Compiler",
+        description: "Natives TypeScript mit optionaler JIT-Kompilierung und AST-Caching.",
       },
       optimization: {
-        title: "Intelligente Optimierung",
-        description: "Echtzeit-Hinweise schlagen Verbesserungen vor, z.B. exists() statt count() > 0. Komplexitätsbewertung hilft, teure Ausdrücke zu identifizieren.",
+        title: "Optimierungshinweise",
+        description: "Echtzeit-Vorschläge und Komplexitätsbewertung.",
       },
       history: {
         title: "Verlauf & Favoriten",
-        description: "Ausdrücke in die Zwischenablage kopieren. Verlauf und Favoriten werden lokal gespeichert. Perfekt für Dokumentation und Debugging.",
+        description: "Zwischenablage, lokaler Verlauf und Favoriten.",
       },
     },
     playground: {
@@ -209,8 +213,10 @@ export const translations: Record<Language, Translations> = {
       empty: "(leer)",
       noHints: "Keine Optimierungsvorschläge",
       complexity: "Komplexität",
-      jit: "JIT",
-      interpreter: "Interpreter",
+      jit: "JIT (kompiliert)",
+      jitTooltip: "Just-In-Time kompiliert: Ausdruck wird in optimierten nativen Code umgewandelt für maximale Performance",
+      interpreter: "Interpretiert",
+      interpreterTooltip: "Interpretierte Ausführung: Ausdruck wird schrittweise ausgewertet (für komplexe Ausdrücke)",
       noJit: "Kein JIT",
       fhirRelease: "FHIR",
       fhirReleaseTooltip: "FHIR-Version für Typprüfung (is/as/ofType)",

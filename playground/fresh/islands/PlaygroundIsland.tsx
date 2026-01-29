@@ -686,17 +686,17 @@ export default function PlaygroundIsland({
             <span class="text-slate-300 dark:text-slate-600 hidden sm:inline">│</span>
           )}
           {/* 3. Performance: atollee time */}
-          <span class="text-slate-500 dark:text-slate-400" title="fhirpath-atollee">
-            ⏱️ {(executionTime * 1000).toFixed(0)}µs
+          <span class="text-slate-500 dark:text-slate-400" title="fhirpath-atollee execution time">
+            ⏱️ {(executionTime * 1000).toFixed(0)}µs <span class="text-slate-400 dark:text-slate-500">atollee</span>
           </span>
           {/* 4. Execution Mode - JIT/Interpreter (after time, explains WHY it's fast) */}
           {analysis && (
             usedJit ? (
-              <span class="px-2 py-0.5 rounded text-xs font-medium badge-jit">
+              <span class="px-2 py-0.5 rounded text-xs font-medium badge-jit cursor-help" title={t.playground.jitTooltip}>
                 ⚡ {t.playground.jit}
               </span>
             ) : (
-              <span class="px-2 py-0.5 rounded text-xs font-medium badge-interpreter">
+              <span class="px-2 py-0.5 rounded text-xs font-medium badge-interpreter cursor-help" title={t.playground.interpreterTooltip}>
                 🔧 {t.playground.interpreter}
               </span>
             )
