@@ -76,14 +76,14 @@ The standard `fhirpath.js` library (HL7/fhirpath.js) is the reference implementa
 
 | Scenario | fhirpath.js 4.8.3 | atollee (interpreted) | atollee (JIT) | JIT Speedup |
 |----------|-------------------|----------------------|---------------|-------------|
-| Simple path (`name.given`) | 6.4 µs | 1.5 µs | 174 ns | **37x** |
-| Where clause | 15.7 µs | 1.5 µs | 268 ns | **59x** |
-| Chained methods | 9.4 µs | 1.2 µs | 135 ns | **70x** |
-| Complex expression | 32.8 µs | 2.0 µs | 822 ns | **40x** |
-| Batch 100 patients | 473 µs | 116 µs | 8.3 µs | **57x** |
-| Batch 1000 patients | 4.5 ms | 1.15 ms | 64 µs | **70x** |
+| Simple path (`name.given`) | 6.5 µs | 1.5 µs | 130 ns | **50x** |
+| Where clause | 15.8 µs | 1.6 µs | 301 ns | **53x** |
+| Chained methods | 9.5 µs | 1.3 µs | 120 ns | **79x** |
+| Complex expression | 31.5 µs | 2.2 µs | 791 ns | **40x** |
+| Batch 100 patients | 472 µs | 131 µs | 7.3 µs | **64x** |
+| Batch 1000 patients | 4.55 ms | 1.30 ms | 52.9 µs | **86x** |
 
-*Benchmarks on Apple M3, Deno 2.x, single-threaded. JIT compilation provides 6-18x speedup over interpreted atollee.*
+*Benchmarks on Apple M3, Deno 2.x, single-threaded. JIT compilation provides 11-25x speedup over interpreted atollee.*
 
 ---
 
@@ -518,7 +518,7 @@ Compiles FHIRPath AST to native JavaScript for maximum performance.
 ```typescript
 import fhirpath from "@atollee/fhirpath-atollee";
 
-// Compile to JIT function (60-70x faster than fhirpath.js)
+// Compile to JIT function (55-86x faster than fhirpath.js)
 const getNames = fhirpath.compileJIT<string[]>("name.given");
 
 // Execute with native JS performance
@@ -1137,8 +1137,8 @@ deno test -A --coverage packages/fhirpath-atollee/tests/
 ### Completed (v0.7.0) - Januar 2026
 - [x] JIT Compiler for Maximum Performance
   - Compiles FHIRPath AST to native JavaScript
-  - **60-70x faster** than fhirpath.js 4.8.3
-  - **10-15x faster** than interpreted atollee
+  - **55-86x faster** than fhirpath.js 4.8.3
+  - **11-25x faster** than interpreted atollee
   - Cached compilation for repeated use
 - [x] Monaco Editor Extension
   - Syntax highlighting with Monarch tokenizer

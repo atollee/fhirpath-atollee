@@ -77,7 +77,7 @@ export default define.page(function PlaygroundPage({ url }) {
           >
             fhirpath-atollee
           </a>
-          {" "}— up to 70x faster than fhirpath.js.
+          {" "}— up to 86x faster than fhirpath.js.
         </p>
       </div>
 
@@ -116,7 +116,7 @@ export default define.page(function PlaygroundPage({ url }) {
             🚀 High Performance
           </h3>
           <p class="text-sm text-gray-600 dark:text-gray-400">
-            JIT compiler delivers 37-70x faster execution than fhirpath.js. 
+            JIT compiler delivers 55-86x faster execution than fhirpath.js. 
             Native TypeScript parser with zero external dependencies.
           </p>
         </div>
