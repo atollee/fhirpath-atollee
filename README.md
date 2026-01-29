@@ -775,8 +775,10 @@ packages/fhirpath-atollee/
 │       ├── worker.ts         # Worker thread implementation
 │       └── types.ts          # Worker types
 ├── fhir-context/
-│   ├── r6/                   # FHIR R6 model
-│   └── r4/                   # FHIR R4 model (planned)
+│   ├── r4/                   # FHIR R4 model
+│   ├── r4b/                  # FHIR R4B model
+│   ├── r5/                   # FHIR R5 model
+│   └── r6/                   # FHIR R6 model
 ├── tests/
 │   ├── basic_test.ts         # Core functionality tests
 │   ├── parser_test.ts        # Parser tests
@@ -1106,7 +1108,7 @@ deno test -A --coverage packages/fhirpath-atollee/tests/
 - [x] 425+ comprehensive tests
 
 ### Completed (v0.4.0) - Januar 2026
-- [x] Native FHIR R4/R5/R6 models (8,238 / 10,344 / 9,543 paths)
+- [x] Native FHIR R4/R4B/R5/R6 models (8,238 / 7,323 / 10,344 / 9,543 paths)
 - [x] JSR/npm build configuration (`deno.json`, `scripts/build-npm.ts`)
 - [x] Browser bundle build script (ESM + UMD via esbuild)
 - [x] Inline FHIR type definitions (no external `fhir/r6` dependency)
