@@ -672,14 +672,36 @@ export default function PlaygroundIsland({
         </div>
       </div>
 
-      {/* Metrics Bar - compact, responsive */}
+      {/* Metrics Bar - compact, responsive, logically ordered */}
       <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
         <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-          {/* atollee time */}
+          {/* 1. Complexity */}
+          {analysis && (
+            <span class="text-slate-500 dark:text-slate-400 hidden sm:inline">
+              📊 {t.playground.complexity}: {analysis.complexity}/100
+            </span>
+          )}
+          {/* 2. Separator */}
+          {analysis && (
+            <span class="text-slate-300 dark:text-slate-600 hidden sm:inline">│</span>
+          )}
+          {/* 3. Performance: atollee time */}
           <span class="text-slate-500 dark:text-slate-400" title="fhirpath-atollee">
             ⏱️ {(executionTime * 1000).toFixed(0)}µs
           </span>
-          {/* fhirpath.js comparison */}
+          {/* 4. Execution Mode - JIT/Interpreter (after time, explains WHY it's fast) */}
+          {analysis && (
+            usedJit ? (
+              <span class="px-2 py-0.5 rounded text-xs font-medium badge-jit">
+                ⚡ {t.playground.jit}
+              </span>
+            ) : (
+              <span class="px-2 py-0.5 rounded text-xs font-medium badge-interpreter">
+                🔧 {t.playground.interpreter}
+              </span>
+            )
+          )}
+          {/* 5. Performance: fhirpath.js comparison */}
           {fhirpathJsTime !== null ? (
             <span class="text-slate-400 dark:text-slate-500" title="fhirpath.js (npm)">
               vs <span class="font-mono">{(fhirpathJsTime * 1000).toFixed(0)}µs</span>
@@ -691,27 +713,11 @@ export default function PlaygroundIsland({
               <span class="text-slate-300 dark:text-slate-600 ml-1">fhirpath.js {lang === "de" ? "nicht unterstützt" : "unsupported"}</span>
             </span>
           ) : null}
-          {/* Speedup badge */}
+          {/* 6. Performance: Speedup badge */}
           {speedup !== null && speedup > 1 && (
             <span class="px-1.5 py-0.5 rounded text-xs font-semibold bg-green-600 dark:bg-green-700 text-white" title="Speedup vs fhirpath.js">
               {speedup.toFixed(1)}x {lang === "de" ? "schneller" : "faster"}
             </span>
-          )}
-          {analysis && (
-            <>
-              <span class="text-slate-500 dark:text-slate-400 hidden sm:inline">
-                📊 {t.playground.complexity}: {analysis.complexity}/100
-              </span>
-              {usedJit ? (
-                <span class="px-2 py-0.5 rounded text-xs font-medium badge-jit">
-                  ⚡ {t.playground.jit}
-                </span>
-              ) : (
-                <span class="px-2 py-0.5 rounded text-xs font-medium badge-interpreter">
-                  🔧 {t.playground.interpreter}
-                </span>
-              )}
-            </>
           )}
         </div>
         {loading && (
