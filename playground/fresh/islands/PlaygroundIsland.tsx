@@ -239,7 +239,7 @@ export default function PlaygroundIsland({
           <textarea
             value={resourceJson}
             onInput={(e) => setResourceJson((e.target as HTMLTextAreaElement).value)}
-            class="w-full h-40 sm:h-48 lg:h-64 p-2 font-mono text-xs border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-transparent resize-none"
+            class="w-full h-40 sm:h-48 lg:h-64 p-2 font-mono text-xs border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[rgb(30,210,255)] focus:border-transparent resize-none"
             spellcheck={false}
           />
         </div>
@@ -254,7 +254,7 @@ export default function PlaygroundIsland({
               </h3>
               <button
                 onClick={toggleFavorite}
-                class={`text-lg leading-none ${isFavorited ? "text-amber-500" : "text-slate-400"} hover:text-amber-500 transition-colors`}
+                class={`text-lg leading-none ${isFavorited ? "text-atollee-orange" : "text-slate-400"} hover:text-atollee-orange transition-colors`}
                 title={isFavorited ? "Remove from favorites" : "Add to favorites"}
               >
                 {isFavorited ? "★" : "☆"}
@@ -263,7 +263,7 @@ export default function PlaygroundIsland({
                 onClick={copyExpression}
                 class={`px-2 py-0.5 text-xs rounded transition-colors ${
                   copied
-                    ? "bg-emerald-600 text-white"
+                    ? "bg-atollee text-black"
                     : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
                 }`}
                 title="Copy expression"
@@ -274,7 +274,7 @@ export default function PlaygroundIsland({
               <div class="relative ml-auto">
                 <button
                   onClick={() => { setShowHistory(!showHistory); setShowFavorites(false); }}
-                  class="text-xs text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+                  class="text-xs text-slate-500 dark:text-slate-400 link-atollee transition-colors"
                 >
                   📜 History {showHistory ? "▲" : "▼"}
                 </button>
@@ -286,7 +286,7 @@ export default function PlaygroundIsland({
                         onClick={() => { setExpression(h.expression); setShowHistory(false); }}
                         class="flex justify-between items-center px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer border-b border-slate-100 dark:border-slate-700 last:border-0"
                       >
-                        <span class="text-xs font-mono text-cyan-600 dark:text-cyan-400 truncate">
+                        <span class="text-xs font-mono code-result truncate">
                           {h.expression}
                         </span>
                         <span class="text-xs text-slate-400 ml-2 whitespace-nowrap">{formatTimeAgo(h.timestamp)}</span>
@@ -300,7 +300,7 @@ export default function PlaygroundIsland({
               type="text"
               value={expression}
               onInput={(e) => setExpression((e.target as HTMLInputElement).value)}
-              class="w-full px-3 py-2 font-mono text-sm border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+              class="w-full px-3 py-2 font-mono text-sm border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[rgb(30,210,255)] focus:border-transparent"
               placeholder="Enter FHIRPath expression..."
             />
             {/* Sample Expressions - scrollable on mobile */}
@@ -309,7 +309,7 @@ export default function PlaygroundIsland({
                 <button
                   key={s.expression}
                   onClick={() => setExpression(s.expression)}
-                  class="px-2 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded hover:bg-cyan-100 dark:hover:bg-cyan-900 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors whitespace-nowrap"
+                  class="px-2 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded hover:bg-[rgba(30,210,255,0.15)] dark:hover:bg-[rgba(0,215,215,0.2)] hover:text-atollee-ocean dark:hover:text-atollee-sea transition-colors whitespace-nowrap"
                   title={s.expression}
                 >
                   {s.label}
@@ -329,7 +329,7 @@ export default function PlaygroundIsland({
                     onClick={() => setActiveTab(tab)}
                     class={`px-3 py-1.5 text-xs font-medium transition-colors ${
                       activeTab === tab
-                        ? "border-b-2 border-cyan-500 text-cyan-600 dark:text-cyan-400"
+                        ? "border-b-2 tab-active"
                         : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                     }`}
                   >
@@ -341,7 +341,7 @@ export default function PlaygroundIsland({
               <div class="relative">
                 <button
                   onClick={() => { setShowFavorites(!showFavorites); setShowHistory(false); }}
-                  class="text-xs text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+                  class="text-xs text-slate-500 dark:text-slate-400 link-atollee transition-colors"
                 >
                   ⭐ Favorites {showFavorites ? "▲" : "▼"}
                 </button>
@@ -354,7 +354,7 @@ export default function PlaygroundIsland({
                       >
                         <span
                           onClick={() => { setExpression(f.expression); setShowFavorites(false); }}
-                          class="text-xs font-mono text-cyan-600 dark:text-cyan-400 truncate cursor-pointer hover:underline"
+                          class="text-xs font-mono code-result truncate cursor-pointer hover:underline"
                         >
                           {f.label}
                         </span>
@@ -386,7 +386,7 @@ export default function PlaygroundIsland({
                       {error}
                     </div>
                   ) : result ? (
-                    <pre class="text-xs font-mono text-cyan-700 dark:text-cyan-400 whitespace-pre-wrap break-words">
+                    <pre class="text-xs font-mono code-result whitespace-pre-wrap break-words">
                       {JSON.stringify(result, null, 2)}
                     </pre>
                   ) : (
@@ -409,9 +409,9 @@ export default function PlaygroundIsland({
                         key={i}
                         class={`p-3 rounded-md border-l-4 ${
                           hint.severity === "critical" ? "border-red-500 bg-red-50 dark:bg-red-900/20" :
-                          hint.severity === "warning" ? "border-amber-500 bg-amber-50 dark:bg-amber-900/20" :
-                          hint.severity === "suggestion" ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20" :
-                          "border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20"
+                          hint.severity === "warning" ? "border-atollee bg-[rgba(250,120,0,0.1)] dark:bg-[rgba(250,120,0,0.15)]" :
+                          hint.severity === "suggestion" ? "border-atollee-sea bg-[rgba(0,215,215,0.1)] dark:bg-[rgba(0,215,215,0.15)]" :
+                          "border-atollee-ocean bg-[rgba(30,210,255,0.1)] dark:bg-[rgba(30,210,255,0.15)]"
                         }`}
                       >
                         <div class="text-sm font-medium text-slate-900 dark:text-white">
@@ -422,14 +422,14 @@ export default function PlaygroundIsland({
                           {hint.explanation}
                         </div>
                         {hint.suggestion && (
-                          <div class="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-mono">
+                          <div class="text-xs text-atollee-sea mt-1 font-mono">
                             💡 {hint.suggestion}
                           </div>
                         )}
                       </div>
                     ))
                   ) : (
-                    <div class="p-3 bg-emerald-50 dark:bg-emerald-900/20 border-l-4 border-emerald-500 rounded-md text-sm text-emerald-700 dark:text-emerald-300">
+                    <div class="p-3 bg-[rgba(0,215,215,0.1)] dark:bg-[rgba(0,215,215,0.15)] border-l-4 border-atollee-sea rounded-md text-sm text-atollee-sea">
                       ✓ No optimization suggestions
                     </div>
                   )}
@@ -453,8 +453,8 @@ export default function PlaygroundIsland({
               </span>
               <span class={`px-2 py-0.5 rounded text-xs font-medium ${
                 analysis.jitCompatible
-                  ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300"
-                  : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300"
+                  ? "badge-jit"
+                  : "badge-warning"
               }`}>
                 {analysis.jitCompatible ? "✓ JIT" : "⚠ No JIT"}
               </span>
@@ -462,7 +462,7 @@ export default function PlaygroundIsland({
           )}
         </div>
         {loading && (
-          <span class="text-cyan-500 animate-pulse">Evaluating...</span>
+          <span class="text-atollee-ocean animate-pulse">Evaluating...</span>
         )}
       </div>
     </div>
