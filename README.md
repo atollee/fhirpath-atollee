@@ -2,7 +2,7 @@
 
 A modern, high-performance FHIRPath implementation in TypeScript - designed as a drop-in replacement for `fhirpath.js` with significant performance improvements.
 
-**Version:** 0.7.3  
+**Version:** 0.7.4  
 **Tests:** 580+ test cases (including official HL7 FHIRPath test suite)  
 **License:** MIT
 
@@ -1190,10 +1190,6 @@ deno test -A --coverage packages/fhirpath-atollee/tests/
   - Intelligent autocomplete for functions
   - Dark/Light theme support
   - Ctrl+Enter to evaluate
-
-### Future
-- [ ] Export/import favorites as JSON
-- [ ] Expression categories/tags
 
 ---
 
