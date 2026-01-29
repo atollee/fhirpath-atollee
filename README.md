@@ -106,12 +106,6 @@ The standard `fhirpath.js` library (HL7/fhirpath.js) is the reference implementa
 }
 ```
 
-### JSR (coming soon)
-
-```bash
-deno add @atollee/fhirpath-atollee
-```
-
 ---
 
 ## Usage
