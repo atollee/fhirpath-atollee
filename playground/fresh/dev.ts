@@ -30,7 +30,7 @@ if (Deno.env.get("DENO_ENV") === "development" || Deno.args.includes("--verbose"
   addLogHandler(ideHandler);
 }
 
-const port = parseInt(Deno.env.get("PLAYGROUND_PORT") || "8080");
+const port = parseInt(Deno.env.get("PLAYGROUND_PORT") || "11100");
 
 console.log(`🔬 FHIRPath Playground starting...`);
 console.log(`📦 Version: 0.7.2`);

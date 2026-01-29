@@ -43,14 +43,18 @@ app.post("/api/evaluate", async (ctx) => {
   return await evaluateHandler.POST(ctx.req);
 });
 
-app.options("/api/evaluate", () => {
-  return new Response(null, {
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
+// Handle OPTIONS preflight for CORS
+app.all("/api/evaluate", (ctx) => {
+  if (ctx.req.method === "OPTIONS") {
+    return new Response(null, {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
+    });
+  }
+  return new Response("Method not allowed", { status: 405 });
 });
 
 // File-system based routes
