@@ -234,28 +234,15 @@ export default function PlaygroundIsland({
 
   return (
     <div class="space-y-3">
-      {/* Top Row: Expression + Actions */}
+      {/* Resource Input - FIRST */}
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
-        <div class="flex items-center gap-3">
-          <div class="flex-1">
-            <input
-              type="text"
-              value={expression}
-              onInput={(e) => setExpression((e.target as HTMLInputElement).value)}
-              class="w-full px-3 py-2 font-mono text-sm border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter FHIRPath expression..."
-            />
-          </div>
-          <button
-            onClick={toggleFavorite}
-            class={`px-2 py-2 text-lg ${isFavorited ? "text-yellow-500" : "text-gray-400"} hover:text-yellow-500`}
-            title={isFavorited ? "Remove from favorites" : "Add to favorites"}
-          >
-            {isFavorited ? "★" : "☆"}
-          </button>
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+            Resource (JSON)
+          </h3>
           <button
             onClick={copyShareableURL}
-            class={`px-3 py-2 text-sm rounded whitespace-nowrap ${
+            class={`px-2 py-1 text-xs rounded ${
               copied
                 ? "bg-green-600 text-white"
                 : "bg-blue-600 text-white hover:bg-blue-700"
@@ -264,8 +251,60 @@ export default function PlaygroundIsland({
             {copied ? "✓ Copied!" : "🔗 Share"}
           </button>
         </div>
-        
-        {/* Sample Expressions - inline */}
+        <textarea
+          value={resourceJson}
+          onInput={(e) => setResourceJson((e.target as HTMLTextAreaElement).value)}
+          class="w-full h-48 p-2 font-mono text-xs border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      {/* Expression Input - SECOND */}
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
+        <div class="flex items-center gap-2 mb-2">
+          <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+            Expression
+          </h3>
+          <button
+            onClick={toggleFavorite}
+            class={`text-lg ${isFavorited ? "text-yellow-500" : "text-gray-400"} hover:text-yellow-500`}
+            title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+          >
+            {isFavorited ? "★" : "☆"}
+          </button>
+          {/* History dropdown */}
+          <div class="relative ml-auto">
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            >
+              📜 History {showHistory ? "▲" : "▼"}
+            </button>
+            {showHistory && history.length > 0 && (
+              <div class="absolute right-0 top-6 z-10 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                {history.slice(0, 10).map((h) => (
+                  <div
+                    key={h.timestamp}
+                    onClick={() => { setExpression(h.expression); setShowHistory(false); }}
+                    class="flex justify-between items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0"
+                  >
+                    <span class="text-xs font-mono text-blue-600 dark:text-blue-400 truncate">
+                      {h.expression}
+                    </span>
+                    <span class="text-xs text-gray-400 ml-2">{formatTimeAgo(h.timestamp)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        <input
+          type="text"
+          value={expression}
+          onInput={(e) => setExpression((e.target as HTMLInputElement).value)}
+          class="w-full px-3 py-2 font-mono text-sm border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+          placeholder="Enter FHIRPath expression..."
+        />
+        {/* Sample Expressions */}
         <div class="flex flex-wrap gap-1.5 mt-2">
           {SAMPLE_EXPRESSIONS.map((s) => (
             <button
@@ -280,50 +319,9 @@ export default function PlaygroundIsland({
         </div>
       </div>
 
-      {/* Main Grid: Resource | Result */}
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        {/* Resource Input */}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
-          <div class="flex justify-between items-center mb-2">
-            <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
-              Resource (JSON)
-            </h3>
-            {/* History dropdown */}
-            <div class="relative">
-              <button
-                onClick={() => setShowHistory(!showHistory)}
-                class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-              >
-                📜 History {showHistory ? "▲" : "▼"}
-              </button>
-              {showHistory && history.length > 0 && (
-                <div class="absolute right-0 top-6 z-10 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                  {history.slice(0, 10).map((h) => (
-                    <div
-                      key={h.timestamp}
-                      onClick={() => { setExpression(h.expression); setShowHistory(false); }}
-                      class="flex justify-between items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0"
-                    >
-                      <span class="text-xs font-mono text-blue-600 dark:text-blue-400 truncate">
-                        {h.expression}
-                      </span>
-                      <span class="text-xs text-gray-400 ml-2">{formatTimeAgo(h.timestamp)}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          <textarea
-            value={resourceJson}
-            onInput={(e) => setResourceJson((e.target as HTMLTextAreaElement).value)}
-            class="w-full h-72 p-2 font-mono text-xs border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Result Panel */}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
-          {/* Tabs + Favorites */}
+      {/* Result Panel */}
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
+        {/* Tabs + Favorites */}
           <div class="flex justify-between items-center mb-2">
             <div class="flex border-b border-gray-200 dark:border-gray-700">
               {(["result", "ast", "hints"] as const).map((tab) => (
@@ -439,7 +437,6 @@ export default function PlaygroundIsland({
               </div>
             )}
           </div>
-        </div>
       </div>
 
       {/* Metrics Bar - compact */}
