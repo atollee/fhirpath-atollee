@@ -333,7 +333,8 @@ export default function PlaygroundIsland({
               onChange={setExpression}
               onSubmit={evaluate}
               isDark={isDark}
-              height="38px"
+              minHeight={38}
+              maxHeight={150}
             />
             {/* Sample Expressions - scrollable on mobile */}
             <div class="flex flex-wrap gap-1.5 mt-2 max-h-20 overflow-y-auto">
