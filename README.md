@@ -934,9 +934,8 @@ deno bench --allow-read --allow-env packages/fhirpath-atollee/benchmarks/
 
 ### Conversion Functions
 - `iif()`, `toBoolean()`, `convertsToBoolean()`, `toInteger()`, `convertsToInteger()`
-- `toDecimal()`, `convertsToDecimal()`, `toQuantity()`, `convertsToQuantity()`
-- `toString()`, `convertsToString()`, `toDateTime()`, `convertsToDateTime()`
-- `toDate()`, `convertsToDate()`, `toTime()`, `convertsToTime()`
+- `toDecimal()`, `convertsToDecimal()`, `toString()`, `convertsToString()`
+- *Planned: `toDate()`, `toDateTime()`, `toTime()`, `toQuantity()` + convertsTo variants*
 
 ### String Functions
 - `indexOf()`, `substring()`, `startsWith()`, `endsWith()`, `contains()`, `upper()`, `lower()`
