@@ -174,8 +174,9 @@ export class FhirPathJIT {
     const code = this.generateFunction(ast, options);
     
     if (options.debug) {
-      console.log("Generated JIT code:");
-      console.log(code);
+      // Debug output for generated JIT code - only when explicitly requested
+      // deno-lint-ignore no-console
+      console.log("Generated JIT code:\n", code);
     }
 
     // Create the function with shared runtime helpers
