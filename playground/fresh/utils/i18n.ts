@@ -58,6 +58,8 @@ export interface Translations {
     complexity: string;
     jit: string;
     noJit: string;
+    fhirRelease: string;
+    fhirReleaseTooltip: string;
   };
   // Sample expressions
   samples: {
@@ -119,6 +121,8 @@ export const translations: Record<Language, Translations> = {
       complexity: "Complexity",
       jit: "JIT",
       noJit: "No JIT",
+      fhirRelease: "FHIR",
+      fhirReleaseTooltip: "FHIR version for type checking (is/as/ofType)",
     },
     samples: {
       givenNames: "Given names",
@@ -176,6 +180,8 @@ export const translations: Record<Language, Translations> = {
       complexity: "Komplexität",
       jit: "JIT",
       noJit: "Kein JIT",
+      fhirRelease: "FHIR",
+      fhirReleaseTooltip: "FHIR-Version für Typprüfung (is/as/ofType)",
     },
     samples: {
       givenNames: "Vornamen",
