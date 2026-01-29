@@ -1,6 +1,49 @@
 @import "tailwindcss";
 
-/* Custom scrollbar for dark mode */
+/* atollee Brand Colors */
+:root {
+  /* Primary: Cyan/Teal - Healthcare/FHIR typical */
+  --atollee-primary: #0891b2;
+  --atollee-primary-light: #22d3ee;
+  --atollee-primary-dark: #0e7490;
+  
+  /* Accent */
+  --atollee-accent: #06b6d4;
+  --atollee-accent-light: #67e8f9;
+  
+  /* Semantic */
+  --atollee-success: #10b981;
+  --atollee-warning: #f59e0b;
+  --atollee-error: #ef4444;
+  
+  /* Light mode */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border-color: #e2e8f0;
+}
+
+.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  --border-color: #334155;
+}
+
+/* Apply theme colors */
+body {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -11,12 +54,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #4b5563;
+  background: var(--text-muted);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+  background: var(--text-secondary);
 }
 
 /* Code/monospace styling */
@@ -34,28 +77,92 @@
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Focus ring customization */
+/* Focus ring with atollee colors */
 *:focus {
   outline: none;
 }
 
 *:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--atollee-primary);
   outline-offset: 2px;
 }
 
 /* Smooth transitions */
-button, a {
+button, a, .transition-theme {
   transition: all 0.2s ease;
+}
+
+/* atollee branded components */
+.btn-primary {
+  background-color: var(--atollee-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--atollee-primary-dark);
+}
+
+.text-atollee {
+  color: var(--atollee-primary);
+}
+
+.bg-atollee {
+  background-color: var(--atollee-primary);
+}
+
+.border-atollee {
+  border-color: var(--atollee-primary);
+}
+
+/* Dark mode toggle animation */
+.dark-mode-toggle {
+  position: relative;
+  width: 48px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--bg-tertiary);
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.dark-mode-toggle::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--atollee-primary);
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s ease;
+}
+
+.dark .dark-mode-toggle::after {
+  transform: translateX(24px);
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .mobile-stack {
+    flex-direction: column;
+  }
+  
+  .mobile-full {
+    width: 100%;
+  }
+  
+  .mobile-hide {
+    display: none;
+  }
 }
 
 /* Print styles */
 @media print {
-  nav, footer, button {
+  nav, footer, button, .dark-mode-toggle {
     display: none !important;
   }
   
-  .bg-white {
+  .bg-white, [class*="bg-"] {
     box-shadow: none !important;
     border: 1px solid #e5e7eb;
   }

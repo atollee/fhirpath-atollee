@@ -48,13 +48,13 @@ const DEFAULT_PATIENT = {
 };
 
 const SAMPLE_EXPRESSIONS = [
-  { label: "Get given names", expression: "name.given" },
+  { label: "Given names", expression: "name.given" },
   { label: "Official name", expression: "name.where(use = 'official').given.first()" },
   { label: "Is active", expression: "active" },
   { label: "Count names", expression: "name.count()" },
   { label: "Has phone", expression: "telecom.where(system = 'phone').exists()" },
-  { label: "All identifiers", expression: "identifier.value" },
-  { label: "Resource type check", expression: "$this is Patient" },
+  { label: "Identifiers", expression: "identifier.value" },
+  { label: "Type check", expression: "$this is Patient" },
 ];
 
 export default function PlaygroundIsland({
@@ -75,7 +75,7 @@ export default function PlaygroundIsland({
   const [activeTab, setActiveTab] = useState<"result" | "ast" | "hints">("result");
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [favorites, setFavorites] = useState<FavoriteEntry[]>([]);
-  const [showHistory, setShowHistory] = useState(true);
+  const [showHistory, setShowHistory] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -229,233 +229,240 @@ export default function PlaygroundIsland({
 
   return (
     <div class="space-y-3">
-      {/* Resource Input - FIRST */}
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
-        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
-          Resource (JSON)
-        </h3>
-        <textarea
-          value={resourceJson}
-          onInput={(e) => setResourceJson((e.target as HTMLTextAreaElement).value)}
-          class="w-full h-48 p-2 font-mono text-xs border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      {/* Expression Input - SECOND */}
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
-        <div class="flex items-center gap-2 mb-2">
-          <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
-            Expression
+      {/* Two-column layout on large screens */}
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {/* Resource Input */}
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-3">
+          <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
+            Resource (JSON)
           </h3>
-          <button
-            onClick={toggleFavorite}
-            class={`text-lg ${isFavorited ? "text-yellow-500" : "text-gray-400"} hover:text-yellow-500`}
-            title={isFavorited ? "Remove from favorites" : "Add to favorites"}
-          >
-            {isFavorited ? "★" : "☆"}
-          </button>
-          <button
-            onClick={copyExpression}
-            class={`px-2 py-0.5 text-xs rounded ${
-              copied
-                ? "bg-green-600 text-white"
-                : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
-            }`}
-            title="Copy expression"
-          >
-            {copied ? "✓" : "📋"}
-          </button>
-          {/* History dropdown */}
-          <div class="relative ml-auto">
-            <button
-              onClick={() => setShowHistory(!showHistory)}
-              class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-            >
-              📜 History {showHistory ? "▲" : "▼"}
-            </button>
-            {showHistory && history.length > 0 && (
-              <div class="absolute right-0 top-6 z-10 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                {history.slice(0, 10).map((h) => (
-                  <div
-                    key={h.timestamp}
-                    onClick={() => { setExpression(h.expression); setShowHistory(false); }}
-                    class="flex justify-between items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0"
-                  >
-                    <span class="text-xs font-mono text-blue-600 dark:text-blue-400 truncate">
-                      {h.expression}
-                    </span>
-                    <span class="text-xs text-gray-400 ml-2">{formatTimeAgo(h.timestamp)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <textarea
+            value={resourceJson}
+            onInput={(e) => setResourceJson((e.target as HTMLTextAreaElement).value)}
+            class="w-full h-40 sm:h-48 lg:h-64 p-2 font-mono text-xs border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-transparent resize-none"
+            spellcheck={false}
+          />
         </div>
-        <input
-          type="text"
-          value={expression}
-          onInput={(e) => setExpression((e.target as HTMLInputElement).value)}
-          class="w-full px-3 py-2 font-mono text-sm border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
-          placeholder="Enter FHIRPath expression..."
-        />
-        {/* Sample Expressions */}
-        <div class="flex flex-wrap gap-1.5 mt-2">
-          {SAMPLE_EXPRESSIONS.map((s) => (
-            <button
-              key={s.expression}
-              onClick={() => setExpression(s.expression)}
-              class="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
-              title={s.expression}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-      </div>
 
-      {/* Result Panel */}
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
-        {/* Tabs + Favorites */}
-          <div class="flex justify-between items-center mb-2">
-            <div class="flex border-b border-gray-200 dark:border-gray-700">
-              {(["result", "ast", "hints"] as const).map((tab) => (
+        {/* Expression Input + Result Panel stacked */}
+        <div class="space-y-3">
+          {/* Expression Input */}
+          <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-3">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                Expression
+              </h3>
+              <button
+                onClick={toggleFavorite}
+                class={`text-lg leading-none ${isFavorited ? "text-amber-500" : "text-slate-400"} hover:text-amber-500 transition-colors`}
+                title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+              >
+                {isFavorited ? "★" : "☆"}
+              </button>
+              <button
+                onClick={copyExpression}
+                class={`px-2 py-0.5 text-xs rounded transition-colors ${
+                  copied
+                    ? "bg-emerald-600 text-white"
+                    : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
+                }`}
+                title="Copy expression"
+              >
+                {copied ? "✓" : "📋"}
+              </button>
+              {/* History dropdown */}
+              <div class="relative ml-auto">
                 <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  class={`px-3 py-1.5 text-xs font-medium ${
-                    activeTab === tab
-                      ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
-                      : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                  }`}
+                  onClick={() => { setShowHistory(!showHistory); setShowFavorites(false); }}
+                  class="text-xs text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
                 >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  📜 History {showHistory ? "▲" : "▼"}
+                </button>
+                {showHistory && history.length > 0 && (
+                  <div class="absolute right-0 top-6 z-20 w-64 sm:w-72 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {history.slice(0, 10).map((h) => (
+                      <div
+                        key={h.timestamp}
+                        onClick={() => { setExpression(h.expression); setShowHistory(false); }}
+                        class="flex justify-between items-center px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer border-b border-slate-100 dark:border-slate-700 last:border-0"
+                      >
+                        <span class="text-xs font-mono text-cyan-600 dark:text-cyan-400 truncate">
+                          {h.expression}
+                        </span>
+                        <span class="text-xs text-slate-400 ml-2 whitespace-nowrap">{formatTimeAgo(h.timestamp)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <input
+              type="text"
+              value={expression}
+              onInput={(e) => setExpression((e.target as HTMLInputElement).value)}
+              class="w-full px-3 py-2 font-mono text-sm border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+              placeholder="Enter FHIRPath expression..."
+            />
+            {/* Sample Expressions - scrollable on mobile */}
+            <div class="flex flex-wrap gap-1.5 mt-2 max-h-20 overflow-y-auto">
+              {SAMPLE_EXPRESSIONS.map((s) => (
+                <button
+                  key={s.expression}
+                  onClick={() => setExpression(s.expression)}
+                  class="px-2 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded hover:bg-cyan-100 dark:hover:bg-cyan-900 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors whitespace-nowrap"
+                  title={s.expression}
+                >
+                  {s.label}
                 </button>
               ))}
             </div>
-            {/* Favorites dropdown */}
-            <div class="relative">
-              <button
-                onClick={() => setShowFavorites(!showFavorites)}
-                class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-              >
-                ⭐ Favorites {showFavorites ? "▲" : "▼"}
-              </button>
-              {showFavorites && favorites.length > 0 && (
-                <div class="absolute right-0 top-6 z-10 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                  {favorites.map((f) => (
-                    <div
-                      key={f.id}
-                      class="flex justify-between items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-0"
-                    >
-                      <span
-                        onClick={() => { setExpression(f.expression); setShowFavorites(false); }}
-                        class="text-xs font-mono text-blue-600 dark:text-blue-400 truncate cursor-pointer hover:underline"
+          </div>
+
+          {/* Result Panel */}
+          <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-3">
+            {/* Tabs + Favorites */}
+            <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
+              <div class="flex border-b border-slate-200 dark:border-slate-700">
+                {(["result", "ast", "hints"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    class={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                      activeTab === tab
+                        ? "border-b-2 border-cyan-500 text-cyan-600 dark:text-cyan-400"
+                        : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                    }`}
+                  >
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </button>
+                ))}
+              </div>
+              {/* Favorites dropdown */}
+              <div class="relative">
+                <button
+                  onClick={() => { setShowFavorites(!showFavorites); setShowHistory(false); }}
+                  class="text-xs text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+                >
+                  ⭐ Favorites {showFavorites ? "▲" : "▼"}
+                </button>
+                {showFavorites && favorites.length > 0 && (
+                  <div class="absolute right-0 top-6 z-20 w-64 sm:w-72 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {favorites.map((f) => (
+                      <div
+                        key={f.id}
+                        class="flex justify-between items-center px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 border-b border-slate-100 dark:border-slate-700 last:border-0"
                       >
-                        {f.label}
-                      </span>
-                      <button
-                        onClick={() => {
-                          setFavorites(prev => {
-                            const newFavs = prev.filter(x => x.id !== f.id);
-                            saveFavorites(newFavs);
-                            return newFavs;
-                          });
-                        }}
-                        class="text-xs text-gray-400 hover:text-red-500 ml-2"
-                      >
-                        ×
-                      </button>
+                        <span
+                          onClick={() => { setExpression(f.expression); setShowFavorites(false); }}
+                          class="text-xs font-mono text-cyan-600 dark:text-cyan-400 truncate cursor-pointer hover:underline"
+                        >
+                          {f.label}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setFavorites(prev => {
+                              const newFavs = prev.filter(x => x.id !== f.id);
+                              saveFavorites(newFavs);
+                              return newFavs;
+                            });
+                          }}
+                          class="text-xs text-slate-400 hover:text-red-500 ml-2 transition-colors"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Tab Content */}
+            <div class="h-40 sm:h-48 lg:h-40 overflow-auto bg-slate-50 dark:bg-slate-900 rounded-md p-2">
+              {activeTab === "result" && (
+                <div>
+                  {error ? (
+                    <div class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-700 dark:text-red-300">
+                      {error}
                     </div>
-                  ))}
+                  ) : result ? (
+                    <pre class="text-xs font-mono text-cyan-700 dark:text-cyan-400 whitespace-pre-wrap break-words">
+                      {JSON.stringify(result, null, 2)}
+                    </pre>
+                  ) : (
+                    <div class="text-slate-400 text-sm italic">(empty)</div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "ast" && analysis?.ast && (
+                <pre class="text-xs font-mono text-slate-600 dark:text-slate-400 whitespace-pre-wrap break-words">
+                  {JSON.stringify(analysis.ast, null, 2)}
+                </pre>
+              )}
+
+              {activeTab === "hints" && (
+                <div class="space-y-2">
+                  {analysis?.hints && analysis.hints.length > 0 ? (
+                    analysis.hints.map((hint, i) => (
+                      <div
+                        key={i}
+                        class={`p-3 rounded-md border-l-4 ${
+                          hint.severity === "critical" ? "border-red-500 bg-red-50 dark:bg-red-900/20" :
+                          hint.severity === "warning" ? "border-amber-500 bg-amber-50 dark:bg-amber-900/20" :
+                          hint.severity === "suggestion" ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20" :
+                          "border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20"
+                        }`}
+                      >
+                        <div class="text-sm font-medium text-slate-900 dark:text-white">
+                          {hint.severity === "critical" ? "🚨" : hint.severity === "warning" ? "⚠️" : hint.severity === "suggestion" ? "💡" : "ℹ️"}{" "}
+                          {hint.message}
+                        </div>
+                        <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                          {hint.explanation}
+                        </div>
+                        {hint.suggestion && (
+                          <div class="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-mono">
+                            💡 {hint.suggestion}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div class="p-3 bg-emerald-50 dark:bg-emerald-900/20 border-l-4 border-emerald-500 rounded-md text-sm text-emerald-700 dark:text-emerald-300">
+                      ✓ No optimization suggestions
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           </div>
-
-          {/* Tab Content */}
-          <div class="h-64 overflow-auto bg-gray-50 dark:bg-gray-900 rounded p-2">
-            {activeTab === "result" && (
-              <div>
-                {error ? (
-                  <div class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded text-sm text-red-700 dark:text-red-300">
-                    {error}
-                  </div>
-                ) : result ? (
-                  <pre class="text-xs font-mono text-blue-600 dark:text-blue-400 whitespace-pre-wrap">
-                    {JSON.stringify(result, null, 2)}
-                  </pre>
-                ) : (
-                  <div class="text-gray-400 text-sm">(empty)</div>
-                )}
-              </div>
-            )}
-
-            {activeTab === "ast" && analysis?.ast && (
-              <pre class="text-xs font-mono text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
-                {JSON.stringify(analysis.ast, null, 2)}
-              </pre>
-            )}
-
-            {activeTab === "hints" && (
-              <div class="space-y-2">
-                {analysis?.hints && analysis.hints.length > 0 ? (
-                  analysis.hints.map((hint, i) => (
-                    <div
-                      key={i}
-                      class={`p-3 rounded border-l-4 ${
-                        hint.severity === "critical" ? "border-red-500 bg-red-50 dark:bg-red-900/20" :
-                        hint.severity === "warning" ? "border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20" :
-                        hint.severity === "suggestion" ? "border-green-500 bg-green-50 dark:bg-green-900/20" :
-                        "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                      }`}
-                    >
-                      <div class="text-sm font-medium text-gray-900 dark:text-white">
-                        {hint.severity === "critical" ? "🚨" : hint.severity === "warning" ? "⚠️" : hint.severity === "suggestion" ? "💡" : "ℹ️"}{" "}
-                        {hint.message}
-                      </div>
-                      <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        {hint.explanation}
-                      </div>
-                      {hint.suggestion && (
-                        <div class="text-xs text-green-600 dark:text-green-400 mt-1 font-mono">
-                          💡 {hint.suggestion}
-                        </div>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <div class="p-3 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 rounded text-sm text-green-700 dark:text-green-300">
-                    ✓ No optimization suggestions
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+        </div>
       </div>
 
-      {/* Metrics Bar - compact */}
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow px-3 py-2 flex items-center justify-between text-xs">
-        <div class="flex items-center space-x-3">
-          <span class="text-gray-500 dark:text-gray-400">
-            ⏱️ {executionTime.toFixed(2)}ms
+      {/* Metrics Bar - compact, responsive */}
+      <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+          <span class="text-slate-500 dark:text-slate-400">
+            ⏱️ {executionTime.toFixed(1)}ms
           </span>
           {analysis && (
             <>
-              <span class="text-gray-500 dark:text-gray-400">
+              <span class="text-slate-500 dark:text-slate-400 hidden sm:inline">
                 📊 Complexity: {analysis.complexity}/100
               </span>
               <span class={`px-2 py-0.5 rounded text-xs font-medium ${
                 analysis.jitCompatible
-                  ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
-                  : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300"
+                  ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300"
+                  : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300"
               }`}>
-                {analysis.jitCompatible ? "JIT Compatible" : "JIT Incompatible"}
+                {analysis.jitCompatible ? "✓ JIT" : "⚠ No JIT"}
               </span>
             </>
           )}
         </div>
         {loading && (
-          <span class="text-blue-500">Evaluating...</span>
+          <span class="text-cyan-500 animate-pulse">Evaluating...</span>
         )}
       </div>
     </div>

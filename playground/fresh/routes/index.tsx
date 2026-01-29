@@ -64,16 +64,16 @@ export default define.page(function PlaygroundPage({ url }) {
   return (
     <div>
       {/* SEO-optimized header with server-rendered content */}
-      <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+      <div class="mb-4 sm:mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">
           FHIRPath Playground
         </h1>
-        <p class="text-gray-600 dark:text-gray-400">
+        <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">
           Interactive FHIRPath expression tester with live evaluation, AST visualization, 
           optimization hints, and JIT compiler support. Powered by{" "}
           <a 
             href="https://github.com/atollee/fhirpath-atollee" 
-            class="text-blue-600 dark:text-blue-400 hover:underline"
+            class="text-cyan-600 dark:text-cyan-400 hover:underline font-medium"
           >
             fhirpath-atollee
           </a>
@@ -83,19 +83,19 @@ export default define.page(function PlaygroundPage({ url }) {
 
       {/* Server-rendered preview for SEO */}
       <noscript>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-4">
-          <h2 class="text-lg font-semibold mb-2">Expression: {initialExpression}</h2>
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-4">
+          <h2 class="text-lg font-semibold mb-2 text-slate-900 dark:text-white">Expression: {initialExpression}</h2>
           {initialError ? (
-            <div class="text-red-600">Error: {initialError}</div>
+            <div class="text-red-600 dark:text-red-400">Error: {initialError}</div>
           ) : (
             <div>
-              <div class="text-sm text-gray-500 mb-1">Result:</div>
-              <pre class="bg-gray-100 dark:bg-gray-900 p-2 rounded text-sm">
+              <div class="text-sm text-slate-500 dark:text-slate-400 mb-1">Result:</div>
+              <pre class="bg-slate-100 dark:bg-slate-900 p-2 rounded text-sm text-slate-800 dark:text-slate-200">
                 {JSON.stringify(initialResult, null, 2)}
               </pre>
             </div>
           )}
-          <p class="mt-4 text-sm text-gray-500">
+          <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">
             Enable JavaScript for the full interactive experience.
           </p>
         </div>
@@ -110,30 +110,30 @@ export default define.page(function PlaygroundPage({ url }) {
       />
 
       {/* Info Section (server-rendered for SEO) */}
-      <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <h3 class="font-semibold text-gray-900 dark:text-white mb-2">
-            🚀 High Performance
+      <div class="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4">
+          <h3 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+            <span class="text-cyan-500">🚀</span> High Performance
           </h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400">
+          <p class="text-sm text-slate-600 dark:text-slate-400">
             JIT compiler delivers 50-75x faster execution than fhirpath.js. 
             Native TypeScript parser with zero external dependencies.
           </p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <h3 class="font-semibold text-gray-900 dark:text-white mb-2">
-            💡 Smart Optimization
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4">
+          <h3 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+            <span class="text-amber-500">💡</span> Smart Optimization
           </h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400">
+          <p class="text-sm text-slate-600 dark:text-slate-400">
             Real-time hints suggest improvements like using exists() instead of count() {">"} 0. 
             Complexity scoring helps identify expensive expressions.
           </p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <h3 class="font-semibold text-gray-900 dark:text-white mb-2">
-            📋 History & Favorites
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:col-span-2 lg:col-span-1">
+          <h3 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+            <span class="text-emerald-500">📋</span> History & Favorites
           </h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400">
+          <p class="text-sm text-slate-600 dark:text-slate-400">
             Copy expressions to clipboard. History and favorites persist locally. 
             Perfect for documentation and debugging.
           </p>
