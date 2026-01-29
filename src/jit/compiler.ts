@@ -49,6 +49,109 @@ export interface JITOptions {
 }
 
 /**
+ * Fast structural hash for AST nodes - O(n) but much faster than JSON.stringify
+ * Uses a simple DJB2-like hash algorithm
+ */
+function hashAST(node: ASTNode): string {
+  let hash = 5381;
+  const stack: unknown[] = [node];
+  
+  while (stack.length > 0) {
+    const item = stack.pop();
+    
+    if (item === null || item === undefined) {
+      hash = ((hash << 5) + hash) ^ 0;
+      continue;
+    }
+    
+    if (typeof item === "string") {
+      for (let i = 0; i < item.length; i++) {
+        hash = ((hash << 5) + hash) ^ item.charCodeAt(i);
+      }
+      continue;
+    }
+    
+    if (typeof item === "number") {
+      hash = ((hash << 5) + hash) ^ (item | 0);
+      continue;
+    }
+    
+    if (typeof item === "boolean") {
+      hash = ((hash << 5) + hash) ^ (item ? 1 : 0);
+      continue;
+    }
+    
+    if (Array.isArray(item)) {
+      hash = ((hash << 5) + hash) ^ 91; // '['
+      for (let i = item.length - 1; i >= 0; i--) {
+        stack.push(item[i]);
+      }
+      continue;
+    }
+    
+    if (typeof item === "object") {
+      hash = ((hash << 5) + hash) ^ 123; // '{'
+      const keys = Object.keys(item as Record<string, unknown>).sort();
+      for (let i = keys.length - 1; i >= 0; i--) {
+        const key = keys[i];
+        stack.push((item as Record<string, unknown>)[key]);
+        stack.push(key);
+      }
+    }
+  }
+  
+  // Convert to hex string for Map key
+  return (hash >>> 0).toString(16);
+}
+
+/**
+ * Shared runtime helpers - created once, passed to all JIT functions
+ * This avoids re-creating helper functions in every generated function body
+ */
+const RUNTIME_HELPERS = {
+  /** Convert value to array */
+  toArray: (v: unknown): unknown[] => v == null ? [] : Array.isArray(v) ? v : [v],
+  
+  /** Flatten nested arrays */
+  flatten: (arr: unknown[][]): unknown[] => arr.flat(),
+  
+  /** Deep equality check without JSON.stringify */
+  equals: (a: unknown, b: unknown): boolean => {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    if (typeof a !== typeof b) return false;
+    if (typeof a !== 'object') return false;
+    
+    if (Array.isArray(a)) {
+      if (!Array.isArray(b) || a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        if (!RUNTIME_HELPERS.equals(a[i], b[i])) return false;
+      }
+      return true;
+    }
+    
+    if (Array.isArray(b)) return false;
+    
+    const aKeys = Object.keys(a);
+    const bKeys = Object.keys(b as object);
+    if (aKeys.length !== bKeys.length) return false;
+    
+    for (const key of aKeys) {
+      if (!(key in (b as object))) return false;
+      if (!RUNTIME_HELPERS.equals((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key])) return false;
+    }
+    return true;
+  },
+  
+  /** Compare two values */
+  compare: (a: unknown, b: unknown): number => {
+    if (a === b) return 0;
+    if ((a as number) < (b as number)) return -1;
+    return 1;
+  },
+};
+
+/**
  * JIT Compiler for FHIRPath expressions
  */
 export class FhirPathJIT {
@@ -59,7 +162,8 @@ export class FhirPathJIT {
    * Compile a FHIRPath AST to a native JavaScript function
    */
   compile<T = unknown>(ast: ASTNode, options: JITOptions = {}): CompiledFhirPath<T> {
-    const cacheKey = JSON.stringify(ast);
+    // Use fast hash instead of JSON.stringify
+    const cacheKey = hashAST(ast);
     
     const cached = this.cache.get(cacheKey);
     if (cached) {
@@ -74,8 +178,13 @@ export class FhirPathJIT {
       console.log(code);
     }
 
-    // Create the function
-    const fn = new Function("resource", "context", "options", code) as CompiledFhirPath<T>;
+    // Create the function with shared runtime helpers
+    const innerFn = new Function("resource", "context", "options", "$rt", code);
+    
+    // Wrap to inject runtime helpers
+    const fn = ((resource: unknown, context?: Record<string, unknown>, opts?: JITOptions) => 
+      innerFn(resource, context, opts, RUNTIME_HELPERS)
+    ) as CompiledFhirPath<T>;
     
     this.cache.set(cacheKey, fn);
     return fn;
@@ -94,23 +203,10 @@ export class FhirPathJIT {
   private generateFunction(ast: ASTNode, options: JITOptions): string {
     const lines: string[] = [];
     
-    // Runtime helpers
+    // Use shared runtime helpers via $rt parameter (passed at call time)
     lines.push(`
-// Runtime helpers
-const toArray = (v) => v == null ? [] : Array.isArray(v) ? v : [v];
-const flatten = (arr) => arr.flat();
-const equals = (a, b) => {
-  if (a === b) return true;
-  if (a == null || b == null) return false;
-  if (typeof a !== typeof b) return false;
-  if (typeof a === 'object') return JSON.stringify(a) === JSON.stringify(b);
-  return false;
-};
-const compare = (a, b) => {
-  if (a === b) return 0;
-  if (a < b) return -1;
-  return 1;
-};
+// Destructure shared runtime helpers (faster access)
+const {toArray, flatten, equals, compare} = $rt;
 `);
 
     // Generate the expression code

@@ -1,8 +1,10 @@
 /**
- * LRU Cache for parsed FHIRPath expressions
+ * High-Performance LRU Cache for parsed FHIRPath expressions
  * 
  * This cache stores parsed ASTs to avoid re-parsing the same expressions.
- * It uses a simple LRU (Least Recently Used) eviction strategy.
+ * Uses O(1) LRU eviction with a double-linked list + Map combination.
+ * 
+ * Performance: O(1) for get, set, and eviction operations.
  * 
  * Thread-safety note: This cache is designed for single-threaded use.
  * For worker-based parallelization, each worker should have its own cache
@@ -12,21 +14,29 @@
 import type { ASTNode, CacheStats } from "./types.ts";
 
 /**
- * Cache entry with access metadata
+ * Node in the double-linked list for O(1) LRU eviction
  */
-interface CacheEntry {
+interface LRUNode {
+  key: string;
   ast: ASTNode;
-  lastAccess: number;
+  prev: LRUNode | null;
+  next: LRUNode | null;
 }
 
 /**
- * LRU Cache for FHIRPath ASTs
+ * High-Performance LRU Cache for FHIRPath ASTs
+ * 
+ * Uses a combination of Map (O(1) lookup) and double-linked list (O(1) eviction)
  */
 export class ExpressionCache {
-  private cache: Map<string, CacheEntry>;
+  private cache: Map<string, LRUNode>;
   private readonly maxSize: number;
   private hits = 0;
   private misses = 0;
+  
+  // Double-linked list head (most recent) and tail (least recent)
+  private head: LRUNode | null = null;
+  private tail: LRUNode | null = null;
 
   /**
    * Create a new expression cache
@@ -46,17 +56,65 @@ export class ExpressionCache {
   }
 
   /**
-   * Get a cached AST or undefined if not found
+   * Move a node to the front of the list (most recently used)
+   */
+  private moveToFront(node: LRUNode): void {
+    if (node === this.head) return; // Already at front
+    
+    // Remove from current position
+    if (node.prev) node.prev.next = node.next;
+    if (node.next) node.next.prev = node.prev;
+    if (node === this.tail) this.tail = node.prev;
+    
+    // Insert at front
+    node.prev = null;
+    node.next = this.head;
+    if (this.head) this.head.prev = node;
+    this.head = node;
+    if (!this.tail) this.tail = node;
+  }
+
+  /**
+   * Add a new node to the front of the list
+   */
+  private addToFront(node: LRUNode): void {
+    node.prev = null;
+    node.next = this.head;
+    if (this.head) this.head.prev = node;
+    this.head = node;
+    if (!this.tail) this.tail = node;
+  }
+
+  /**
+   * Remove the tail node (least recently used) - O(1)
+   */
+  private removeTail(): LRUNode | null {
+    if (!this.tail) return null;
+    
+    const removed = this.tail;
+    this.tail = removed.prev;
+    if (this.tail) {
+      this.tail.next = null;
+    } else {
+      this.head = null;
+    }
+    removed.prev = null;
+    removed.next = null;
+    return removed;
+  }
+
+  /**
+   * Get a cached AST or undefined if not found - O(1)
    */
   get(expression: string, base?: string): ASTNode | undefined {
     const key = this.makeKey(expression, base);
-    const entry = this.cache.get(key);
+    const node = this.cache.get(key);
     
-    if (entry) {
-      // Update access time for LRU
-      entry.lastAccess = Date.now();
+    if (node) {
+      // Move to front (most recently used)
+      this.moveToFront(node);
       this.hits++;
-      return entry.ast;
+      return node.ast;
     }
     
     this.misses++;
@@ -64,34 +122,56 @@ export class ExpressionCache {
   }
 
   /**
-   * Store an AST in the cache
+   * Store an AST in the cache - O(1)
    */
   set(expression: string, ast: ASTNode, base?: string): void {
     const key = this.makeKey(expression, base);
     
-    // Evict if at capacity
-    if (this.cache.size >= this.maxSize && !this.cache.has(key)) {
-      this.evictLRU();
+    // Check if already exists
+    const existing = this.cache.get(key);
+    if (existing) {
+      existing.ast = ast;
+      this.moveToFront(existing);
+      return;
     }
     
-    this.cache.set(key, {
-      ast,
-      lastAccess: Date.now(),
-    });
+    // Evict if at capacity - O(1)
+    if (this.cache.size >= this.maxSize) {
+      const removed = this.removeTail();
+      if (removed) {
+        this.cache.delete(removed.key);
+      }
+    }
+    
+    // Create new node and add to front
+    const node: LRUNode = { key, ast, prev: null, next: null };
+    this.addToFront(node);
+    this.cache.set(key, node);
   }
 
   /**
-   * Check if an expression is cached
+   * Check if an expression is cached - O(1)
    */
   has(expression: string, base?: string): boolean {
     return this.cache.has(this.makeKey(expression, base));
   }
 
   /**
-   * Remove an expression from cache
+   * Remove an expression from cache - O(1)
    */
   delete(expression: string, base?: string): boolean {
-    return this.cache.delete(this.makeKey(expression, base));
+    const key = this.makeKey(expression, base);
+    const node = this.cache.get(key);
+    
+    if (!node) return false;
+    
+    // Remove from list
+    if (node.prev) node.prev.next = node.next;
+    if (node.next) node.next.prev = node.prev;
+    if (node === this.head) this.head = node.next;
+    if (node === this.tail) this.tail = node.prev;
+    
+    return this.cache.delete(key);
   }
 
   /**
@@ -99,6 +179,8 @@ export class ExpressionCache {
    */
   clear(): void {
     this.cache.clear();
+    this.head = null;
+    this.tail = null;
     this.hits = 0;
     this.misses = 0;
   }
@@ -118,25 +200,6 @@ export class ExpressionCache {
   }
 
   /**
-   * Evict the least recently used entry
-   */
-  private evictLRU(): void {
-    let oldestKey: string | undefined;
-    let oldestTime = Infinity;
-
-    for (const [key, entry] of this.cache) {
-      if (entry.lastAccess < oldestTime) {
-        oldestTime = entry.lastAccess;
-        oldestKey = key;
-      }
-    }
-
-    if (oldestKey) {
-      this.cache.delete(oldestKey);
-    }
-  }
-
-  /**
    * Get the current size of the cache
    */
   get size(): number {
@@ -145,10 +208,13 @@ export class ExpressionCache {
 
   /**
    * Iterate over all cached expressions (for debugging)
+   * Returns entries in LRU order (most recent first)
    */
   *entries(): IterableIterator<[string, ASTNode]> {
-    for (const [key, entry] of this.cache) {
-      yield [key, entry.ast];
+    let current = this.head;
+    while (current) {
+      yield [current.key, current.ast];
+      current = current.next;
     }
   }
 }

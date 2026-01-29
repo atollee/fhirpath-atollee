@@ -77,7 +77,8 @@ export class FhirPathLexer {
       return null;
     }
 
-    const start = this.pos;
+    // Capture position BEFORE processing - O(1) instead of recalculating
+    const startPos = this.pos;
     const startLine = this.line;
     const startColumn = this.column;
     const char = this.peek();
@@ -137,6 +138,8 @@ export class FhirPathLexer {
 
   private readWhitespace(): Token {
     const start = this.pos;
+    const startLine = this.line;
+    const startColumn = this.column;
     while (!this.isAtEnd() && this.isWhitespace(this.peek())) {
       if (this.peek() === "\n") {
         this.line++;
@@ -146,11 +149,13 @@ export class FhirPathLexer {
         this.advance();
       }
     }
-    return this.makeTokenAt(TokenType.WHITESPACE, this.input.slice(start, this.pos), start);
+    return this.makeTokenAt(TokenType.WHITESPACE, this.input.slice(start, this.pos), start, startLine, startColumn);
   }
 
   private readComment(): Token {
     const start = this.pos;
+    const startLine = this.line;
+    const startColumn = this.column;
     this.advance(); // consume first /
     
     if (this.peek() === "/") {
@@ -176,11 +181,13 @@ export class FhirPathLexer {
       }
     }
     
-    return this.makeTokenAt(TokenType.COMMENT, this.input.slice(start, this.pos), start);
+    return this.makeTokenAt(TokenType.COMMENT, this.input.slice(start, this.pos), start, startLine, startColumn);
   }
 
   private readString(): Token {
     const start = this.pos;
+    const startLine = this.line;
+    const startColumn = this.column;
     const quote = this.advance(); // consume opening quote
     let value = "";
     
@@ -213,22 +220,24 @@ export class FhirPathLexer {
           }
         }
       } else if (this.peek() === "\n") {
-        throw new LexerError("Unterminated string", start, this.line, this.column);
+        throw new LexerError("Unterminated string", start, startLine, startColumn);
       } else {
         value += this.advance();
       }
     }
     
     if (this.isAtEnd()) {
-      throw new LexerError("Unterminated string", start, this.line, this.column);
+      throw new LexerError("Unterminated string", start, startLine, startColumn);
     }
     
     this.advance(); // consume closing quote
-    return this.makeTokenAt(TokenType.STRING, value, start);
+    return this.makeTokenAt(TokenType.STRING, value, start, startLine, startColumn);
   }
 
   private readNumber(): Token {
     const start = this.pos;
+    const startLine = this.line;
+    const startColumn = this.column;
     let value = "";
     
     // Integer part
@@ -262,7 +271,7 @@ export class FhirPathLexer {
     if (this.peek() === "'") {
       // UCUM unit in quotes
       const unitToken = this.readString();
-      return this.makeTokenAt(TokenType.QUANTITY, value + " '" + unitToken.value + "'", start);
+      return this.makeTokenAt(TokenType.QUANTITY, value + " '" + unitToken.value + "'", start, startLine, startColumn);
     } else if (this.isLetter(this.peek())) {
       // Time unit without quotes: year, month, day, etc.
       const unitStart = this.pos;
@@ -273,13 +282,13 @@ export class FhirPathLexer {
       const timeUnits = ["year", "years", "month", "months", "week", "weeks", "day", "days", 
                          "hour", "hours", "minute", "minutes", "second", "seconds", "millisecond", "milliseconds"];
       if (timeUnits.includes(unit)) {
-        return this.makeTokenAt(TokenType.QUANTITY, value + " " + unit, start);
+        return this.makeTokenAt(TokenType.QUANTITY, value + " " + unit, start, startLine, startColumn);
       }
       // Not a time unit, reset position
       this.pos = afterNumber;
     }
     
-    return this.makeTokenAt(TokenType.NUMBER, value, start);
+    return this.makeTokenAt(TokenType.NUMBER, value, start, startLine, startColumn);
   }
 
   private skipWhitespaceOnly(): void {
@@ -290,6 +299,8 @@ export class FhirPathLexer {
 
   private readDateTimeLiteral(): Token {
     const start = this.pos;
+    const startLine = this.line;
+    const startColumn = this.column;
     this.advance(); // consume @
     
     let value = "";
@@ -303,7 +314,7 @@ export class FhirPathLexer {
              this.peek() === "." || this.peek() === "+" || this.peek() === "-" || this.peek() === "Z")) {
         value += this.advance();
       }
-      return this.makeTokenAt(TokenType.TIME, value, start);
+      return this.makeTokenAt(TokenType.TIME, value, start, startLine, startColumn);
     }
     
     // Read date part: YYYY-MM-DD
@@ -319,14 +330,16 @@ export class FhirPathLexer {
              this.peek() === "." || this.peek() === "+" || this.peek() === "-" || this.peek() === "Z")) {
         value += this.advance();
       }
-      return this.makeTokenAt(TokenType.DATETIME, value, start);
+      return this.makeTokenAt(TokenType.DATETIME, value, start, startLine, startColumn);
     }
     
-    return this.makeTokenAt(TokenType.DATE, value, start);
+    return this.makeTokenAt(TokenType.DATE, value, start, startLine, startColumn);
   }
 
   private readEnvironmentVariable(): Token {
     const start = this.pos;
+    const startLine = this.line;
+    const startColumn = this.column;
     this.advance(); // consume %
     
     let value = "%";
@@ -348,11 +361,13 @@ export class FhirPathLexer {
       }
     }
     
-    return this.makeTokenAt(TokenType.IDENTIFIER, value, start);
+    return this.makeTokenAt(TokenType.IDENTIFIER, value, start, startLine, startColumn);
   }
 
   private readSpecialIdentifier(): Token {
     const start = this.pos;
+    const startLine = this.line;
+    const startColumn = this.column;
     this.advance(); // consume $
     
     let value = "$";
@@ -360,11 +375,13 @@ export class FhirPathLexer {
       value += this.advance();
     }
     
-    return this.makeTokenAt(TokenType.IDENTIFIER, value, start);
+    return this.makeTokenAt(TokenType.IDENTIFIER, value, start, startLine, startColumn);
   }
 
   private readDelimitedIdentifier(): Token {
     const start = this.pos;
+    const startLine = this.line;
+    const startColumn = this.column;
     this.advance(); // consume opening `
     
     let value = "";
@@ -385,15 +402,17 @@ export class FhirPathLexer {
     }
     
     if (this.isAtEnd()) {
-      throw new LexerError("Unterminated delimited identifier", start, this.line, this.column);
+      throw new LexerError("Unterminated delimited identifier", start, startLine, startColumn);
     }
     
     this.advance(); // consume closing `
-    return this.makeTokenAt(TokenType.DELIMITED_IDENTIFIER, value, start);
+    return this.makeTokenAt(TokenType.DELIMITED_IDENTIFIER, value, start, startLine, startColumn);
   }
 
   private readIdentifier(): Token {
     const start = this.pos;
+    const startLine = this.line;
+    const startColumn = this.column;
     let value = "";
     
     while (!this.isAtEnd() && this.isIdentifierPart(this.peek())) {
@@ -403,64 +422,66 @@ export class FhirPathLexer {
     // Check if it's a keyword
     const keywordType = getKeywordType(value);
     if (keywordType) {
-      return this.makeTokenAt(keywordType, value, start);
+      return this.makeTokenAt(keywordType, value, start, startLine, startColumn);
     }
     
-    return this.makeTokenAt(TokenType.IDENTIFIER, value, start);
+    return this.makeTokenAt(TokenType.IDENTIFIER, value, start, startLine, startColumn);
   }
 
   private readOperator(): Token {
     const start = this.pos;
+    const startLine = this.line;
+    const startColumn = this.column;
     const char = this.advance();
     
     switch (char) {
-      case ".": return this.makeTokenAt(TokenType.DOT, ".", start);
-      case ",": return this.makeTokenAt(TokenType.COMMA, ",", start);
-      case "+": return this.makeTokenAt(TokenType.PLUS, "+", start);
-      case "-": return this.makeTokenAt(TokenType.MINUS, "-", start);
-      case "*": return this.makeTokenAt(TokenType.STAR, "*", start);
-      case "/": return this.makeTokenAt(TokenType.SLASH, "/", start);
-      case "|": return this.makeTokenAt(TokenType.UNION, "|", start);
-      case "&": return this.makeTokenAt(TokenType.AMPERSAND, "&", start);
-      case "(": return this.makeTokenAt(TokenType.LPAREN, "(", start);
-      case ")": return this.makeTokenAt(TokenType.RPAREN, ")", start);
-      case "[": return this.makeTokenAt(TokenType.LBRACKET, "[", start);
-      case "]": return this.makeTokenAt(TokenType.RBRACKET, "]", start);
-      case "{": return this.makeTokenAt(TokenType.LBRACE, "{", start);
-      case "}": return this.makeTokenAt(TokenType.RBRACE, "}", start);
-      case ":": return this.makeTokenAt(TokenType.COLON, ":", start);
+      case ".": return this.makeTokenAt(TokenType.DOT, ".", start, startLine, startColumn);
+      case ",": return this.makeTokenAt(TokenType.COMMA, ",", start, startLine, startColumn);
+      case "+": return this.makeTokenAt(TokenType.PLUS, "+", start, startLine, startColumn);
+      case "-": return this.makeTokenAt(TokenType.MINUS, "-", start, startLine, startColumn);
+      case "*": return this.makeTokenAt(TokenType.STAR, "*", start, startLine, startColumn);
+      case "/": return this.makeTokenAt(TokenType.SLASH, "/", start, startLine, startColumn);
+      case "|": return this.makeTokenAt(TokenType.UNION, "|", start, startLine, startColumn);
+      case "&": return this.makeTokenAt(TokenType.AMPERSAND, "&", start, startLine, startColumn);
+      case "(": return this.makeTokenAt(TokenType.LPAREN, "(", start, startLine, startColumn);
+      case ")": return this.makeTokenAt(TokenType.RPAREN, ")", start, startLine, startColumn);
+      case "[": return this.makeTokenAt(TokenType.LBRACKET, "[", start, startLine, startColumn);
+      case "]": return this.makeTokenAt(TokenType.RBRACKET, "]", start, startLine, startColumn);
+      case "{": return this.makeTokenAt(TokenType.LBRACE, "{", start, startLine, startColumn);
+      case "}": return this.makeTokenAt(TokenType.RBRACE, "}", start, startLine, startColumn);
+      case ":": return this.makeTokenAt(TokenType.COLON, ":", start, startLine, startColumn);
       
-      case "=": return this.makeTokenAt(TokenType.EQ, "=", start);
+      case "=": return this.makeTokenAt(TokenType.EQ, "=", start, startLine, startColumn);
       
       case "!":
         if (this.peek() === "=") {
           this.advance();
-          return this.makeTokenAt(TokenType.NE, "!=", start);
+          return this.makeTokenAt(TokenType.NE, "!=", start, startLine, startColumn);
         }
         if (this.peek() === "~") {
           this.advance();
-          return this.makeTokenAt(TokenType.NOT_EQUIVALENT, "!~", start);
+          return this.makeTokenAt(TokenType.NOT_EQUIVALENT, "!~", start, startLine, startColumn);
         }
-        throw new LexerError(`Unexpected character: ${char}`, start, this.line, this.column);
+        throw new LexerError(`Unexpected character: ${char}`, start, startLine, startColumn);
       
-      case "~": return this.makeTokenAt(TokenType.EQUIVALENT, "~", start);
+      case "~": return this.makeTokenAt(TokenType.EQUIVALENT, "~", start, startLine, startColumn);
       
       case "<":
         if (this.peek() === "=") {
           this.advance();
-          return this.makeTokenAt(TokenType.LE, "<=", start);
+          return this.makeTokenAt(TokenType.LE, "<=", start, startLine, startColumn);
         }
-        return this.makeTokenAt(TokenType.LT, "<", start);
+        return this.makeTokenAt(TokenType.LT, "<", start, startLine, startColumn);
       
       case ">":
         if (this.peek() === "=") {
           this.advance();
-          return this.makeTokenAt(TokenType.GE, ">=", start);
+          return this.makeTokenAt(TokenType.GE, ">=", start, startLine, startColumn);
         }
-        return this.makeTokenAt(TokenType.GT, ">", start);
+        return this.makeTokenAt(TokenType.GT, ">", start, startLine, startColumn);
       
       default:
-        throw new LexerError(`Unexpected character: ${char}`, start, this.line, this.column);
+        throw new LexerError(`Unexpected character: ${char}`, start, startLine, startColumn);
     }
   }
 
@@ -520,26 +541,17 @@ export class FhirPathLexer {
     };
   }
 
-  private makeTokenAt(type: TokenType, value: string, start: number): Token {
-    // Calculate line and column for start position
-    let line = 1;
-    let column = 1;
-    for (let i = 0; i < start; i++) {
-      if (this.input[i] === "\n") {
-        line++;
-        column = 1;
-      } else {
-        column++;
-      }
-    }
-    
+  /**
+   * Create token at position with pre-captured line/column (O(1))
+   */
+  private makeTokenAt(type: TokenType, value: string, start: number, startLine?: number, startColumn?: number): Token {
     return {
       type,
       value,
       start,
       end: this.pos,
-      line,
-      column,
+      line: startLine ?? this.line,
+      column: startColumn ?? this.column,
     };
   }
 }

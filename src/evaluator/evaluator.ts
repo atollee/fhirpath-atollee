@@ -1544,16 +1544,49 @@ export class FhirPathEvaluator {
     return [value];
   }
 
+  /**
+   * Deep structural equality without JSON.stringify - O(n) but much faster
+   */
   private equals(a: unknown, b: unknown): boolean {
+    // Fast path: strict equality
     if (a === b) return true;
     if (a == null || b == null) return false;
     if (typeof a !== typeof b) return false;
-    if (typeof a === "object") {
-      return JSON.stringify(a) === JSON.stringify(b);
+    
+    // Primitives already checked above
+    if (typeof a !== "object") return false;
+    
+    // Arrays
+    if (Array.isArray(a)) {
+      if (!Array.isArray(b)) return false;
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        if (!this.equals(a[i], b[i])) return false;
+      }
+      return true;
     }
-    return false;
+    
+    // Objects
+    if (Array.isArray(b)) return false;
+    
+    const aObj = a as Record<string, unknown>;
+    const bObj = b as Record<string, unknown>;
+    const aKeys = Object.keys(aObj);
+    const bKeys = Object.keys(bObj);
+    
+    if (aKeys.length !== bKeys.length) return false;
+    
+    for (const key of aKeys) {
+      if (!(key in bObj)) return false;
+      if (!this.equals(aObj[key], bObj[key])) return false;
+    }
+    
+    return true;
   }
 
+  /**
+   * Equivalence comparison (case-insensitive for strings)
+   */
   private equivalent(a: unknown, b: unknown): boolean {
     // Case-insensitive string comparison
     if (typeof a === "string" && typeof b === "string") {
