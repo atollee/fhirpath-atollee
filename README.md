@@ -15,6 +15,8 @@ A modern, high-performance FHIRPath implementation in TypeScript - designed as a
 3. [Installation](#installation)
 4. [Usage](#usage)
 5. [API Reference](#api-reference)
+   - [FHIRPath Playground](#fhirpath-playground-v072)
+   - [FHIRPath in the Frontend](#fhirpath-in-the-frontend--use-cases)
 6. [Architecture](#architecture)
 7. [Performance](#performance)
 8. [Supported Functions](#supported-functions)
@@ -658,9 +660,51 @@ await log.time("Database query", async () => {
 
 ### FHIRPath Playground (v0.7.2)
 
-Interactive playground for testing FHIRPath expressions with **two deployment options**:
+Interactive playground for testing FHIRPath expressions with **three deployment options**:
 
-#### Option 1: Web Component (Client-side)
+#### Option 1: Server-Side Rendered (Deno Fresh 2.2.0) — Recommended
+
+```bash
+# Start the SSR playground (default port: 11100)
+cd packages/fhirpath-atollee/playground/fresh
+deno task dev
+
+# Open http://localhost:11100
+
+# Use custom port with PLAYGROUND_PORT environment variable
+PLAYGROUND_PORT=8080 deno task dev
+```
+
+**SSR Features:**
+- Server-rendered initial content (SEO-friendly)
+- Island architecture with Preact for interactivity
+- Tailwind CSS (no Vite, pure Fresh)
+- Full FHIRPath evaluation server-side
+- Dark/Light mode with system preference detection
+- English/German language support
+
+#### Option 2: Client-Side Only (Static Hosting / GitHub Pages)
+
+For deployments without a server (GitHub Pages, CDN, S3):
+
+```bash
+# Development
+cd packages/fhirpath-atollee/playground/client-side-only
+deno task dev
+
+# Build for production
+deno task build
+
+# Deploy the `dist/` folder to any static host
+```
+
+**Client-Side Features:**
+- Pure static deployment (no server required)
+- Vite + Preact build
+- Requires `fhirpath-atollee` via ESM import from CDN or npm bundle
+- GitHub Pages ready via `.github/workflows/deploy-playground.yml`
+
+#### Option 3: Web Component (Embeddable)
 
 ```html
 <script type="module">
@@ -690,39 +734,70 @@ Interactive playground for testing FHIRPath expressions with **two deployment op
 </script>
 ```
 
-#### Option 2: Server-Side Rendered (Deno Fresh 2.2.0)
-
-```bash
-# Start the SSR playground (default port: 11100)
-cd packages/fhirpath-atollee/playground/fresh
-deno task dev
-
-# Open http://localhost:11100
-
-# Use custom port with PLAYGROUND_PORT environment variable
-PLAYGROUND_PORT=8080 deno task dev
-```
-
-**SSR Features:**
-- Server-rendered initial content (SEO-friendly)
-- Island architecture with Preact for interactivity
-- Tailwind CSS (no Vite, pure Fresh)
-- Social sharing with Open Graph meta tags
-- Shareable URLs: `?expr=name.given&resource={...}`
-
-**Common Features (both versions):**
+**Common Features (all versions):**
 - Live expression evaluation
 - AST visualization (toggle view)
 - Optimization hints display
 - Performance metrics (execution time, complexity)
 - JIT compatibility indicator
-- Sample expressions for quick testing
+- 13 function categories with 80+ sample expressions
 - Expression history (localStorage)
 - Favorites management
-- One-click URL sharing
 - FHIR Release selector (R4/R4B/R5/R6) for type-aware evaluation
-- Dark/Light mode with system preference detection
-- English/German language support
+
+---
+
+### FHIRPath in the Frontend — Use Cases
+
+Unlike `fhirpath.js` (which relies on ANTLR4 and has browser compatibility issues), **fhirpath-atollee** is designed to run natively in the browser. This enables powerful client-side FHIR data processing:
+
+#### Ideal Use Cases
+
+| Use Case | Description | Benefit |
+|----------|-------------|---------|
+| **Patient Portals** | Extract and display patient data without server roundtrips | Faster UI, reduced server load |
+| **SMART on FHIR Apps** | Process FHIR data in-browser after OAuth flow | Privacy (data stays local), offline-capable |
+| **Mobile Health Apps** | Real-time data extraction in PWAs/hybrid apps | Low latency, works offline |
+| **Clinical Decision Support** | Evaluate CDS rules client-side before server validation | Instant feedback, reduced API calls |
+| **Form Pre-population** | Extract values from FHIR resources to prefill forms | Seamless UX, no loading states |
+| **Data Visualization** | Transform FHIR data for charts/dashboards in-browser | Real-time updates, no backend needed |
+| **Questionnaire Rendering** | Evaluate `enableWhen` and `calculatedExpression` | FHIR Questionnaire R5/R6 compliant |
+| **Resource Validation** | Client-side FHIRPath constraint checking | Instant validation feedback |
+| **Search/Filter UI** | Filter large FHIR Bundles client-side | Fast filtering without API calls |
+| **Educational Tools** | Interactive FHIRPath learning environments | No server setup required |
+
+#### Browser Integration Example
+
+```typescript
+// Import from CDN or bundled
+import { evaluate } from '@atollee/fhirpath-atollee';
+
+// Extract patient display name
+const patient = await fetch('/fhir/Patient/123').then(r => r.json());
+const displayName = evaluate(patient, "name.where(use='official').text | name.first().given.join(' ')");
+
+// Evaluate Questionnaire enableWhen
+const item = questionnaireItem;
+const answers = userAnswers;
+const isEnabled = evaluate(answers, item.enableWhen[0].expression);
+
+// Filter Bundle client-side
+const bundle = await fetch('/fhir/Observation?patient=123').then(r => r.json());
+const abnormalLabs = evaluate(bundle, 
+  "entry.resource.where(interpretation.coding.code = 'H' or interpretation.coding.code = 'L')"
+);
+```
+
+#### Why Client-Side FHIRPath?
+
+| Aspect | Server-Side | Client-Side (fhirpath-atollee) |
+|--------|-------------|-------------------------------|
+| **Latency** | Network roundtrip required | Instant (< 1ms typical) |
+| **Privacy** | Data leaves browser | Data stays local |
+| **Offline** | Not possible | Fully supported |
+| **Server Load** | Every evaluation = API call | Zero server involvement |
+| **Bundle Size** | N/A | ~57KB (ESM, minified) |
+| **Scalability** | Limited by server capacity | Scales with user devices |
 
 ---
 
