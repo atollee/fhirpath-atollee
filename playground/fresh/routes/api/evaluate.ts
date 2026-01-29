@@ -98,11 +98,11 @@ export const handler = {
         const evalStart = performance.now();
         
         // Try JIT compiler if expression is compatible (much faster)
-        if (analysis.jitCompatible) {
+        if (analysis.jitCompatible && ast) {
           try {
             let jitFn = jitCache.get(expression);
             if (!jitFn) {
-              jitFn = compileJIT<unknown[]>(expression);
+              jitFn = compileJIT<unknown[]>(ast);
               jitCache.set(expression, jitFn);
             }
             result = jitFn(resource || {}, context);
