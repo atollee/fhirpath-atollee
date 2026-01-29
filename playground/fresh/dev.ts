@@ -33,7 +33,7 @@ if (Deno.env.get("DENO_ENV") === "development" || Deno.args.includes("--verbose"
 const port = parseInt(Deno.env.get("PLAYGROUND_PORT") || "11100");
 
 console.log(`🔬 FHIRPath Playground starting...`);
-console.log(`📦 Version: 0.7.2`);
+console.log(`📦 Version: 0.7.3`);
 
 // Get the playground directory path
 const playgroundDir = new URL("./", import.meta.url).pathname;

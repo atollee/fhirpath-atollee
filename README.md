@@ -2,7 +2,7 @@
 
 A modern, high-performance FHIRPath implementation in TypeScript - designed as a drop-in replacement for `fhirpath.js` with significant performance improvements.
 
-**Version:** 0.7.2  
+**Version:** 0.7.3  
 **Tests:** 580+ test cases (including official HL7 FHIRPath test suite)  
 **License:** MIT
 
@@ -1184,10 +1184,16 @@ deno test -A --coverage packages/fhirpath-atollee/tests/
   - Tailwind CSS (no Vite)
   - Meta tags for social sharing
 
+### Completed (v0.7.3)
+- [x] Monaco Editor integration in Playground
+  - Syntax highlighting for FHIRPath
+  - Intelligent autocomplete for functions
+  - Dark/Light theme support
+  - Ctrl+Enter to evaluate
+
 ### Future
 - [ ] Export/import favorites as JSON
 - [ ] Expression categories/tags
-- [ ] Monaco Editor integration in Playground
 
 ---
 
