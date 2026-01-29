@@ -33,6 +33,8 @@ import type {
   FhirPathCollection,
 } from "./types.ts";
 
+import { getTypeInfo } from "./types.ts";
+
 import * as fn from "./functions.ts";
 
 /**
@@ -516,6 +518,11 @@ export class FhirPathEvaluator {
           this.options.traceFn(collection, label);
         }
         return collection;
+
+      // Reflection (STU)
+      case "type":
+        // Returns TypeInfo for each element in the collection
+        return collection.map(v => getTypeInfo(v));
 
       // Variable definition
       case "defineVariable":
