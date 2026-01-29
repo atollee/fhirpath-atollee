@@ -9,6 +9,7 @@
 import { FhirPathEngine } from "../../../../src/engine.ts";
 import { parseFhirPath } from "../../../../src/parser/mod.ts";
 import { analyzeExpression } from "../../../../src/optimizer/mod.ts";
+import { compileJIT, type CompiledFhirPath } from "../../../../src/jit/mod.ts";
 import { loggers } from "../../../../src/logging.ts";
 
 // Import FHIR models
@@ -43,6 +44,9 @@ function getEngine(version: FhirVersion): FhirPathEngine {
 
 // Default engine (no model, for basic evaluation)
 const defaultEngine = new FhirPathEngine();
+
+// JIT function cache
+const jitCache = new Map<string, CompiledFhirPath<unknown[]>>();
 
 export const handler = {
   async POST(req: Request): Promise<Response> {
@@ -84,17 +88,30 @@ export const handler = {
       // Analyze expression for optimization hints
       const analysis = analyzeExpression(expression);
 
-      // Evaluate - use model-aware engine if FHIR version specified
+      // Evaluate - use JIT if compatible, otherwise interpreted
       let result = null;
       let error = null;
       let evalDuration = 0;
+      let usedJit = false;
 
       try {
-        const engine = version ? getEngine(version) : defaultEngine;
-        
-        // Measure ONLY the FHIRPath evaluation time
         const evalStart = performance.now();
-        result = engine.evaluate(resource || {}, expression, context);
+        
+        // Use JIT compiler if expression is compatible (much faster)
+        if (analysis.jitCompatible) {
+          let jitFn = jitCache.get(expression);
+          if (!jitFn) {
+            jitFn = compileJIT<unknown[]>(expression);
+            jitCache.set(expression, jitFn);
+          }
+          result = jitFn(resource || {}, context);
+          usedJit = true;
+        } else {
+          // Fall back to interpreted evaluation
+          const engine = version ? getEngine(version) : defaultEngine;
+          result = engine.evaluate(resource || {}, expression, context);
+        }
+        
         evalDuration = performance.now() - evalStart;
       } catch (e) {
         error = e instanceof Error ? e.message : String(e);
@@ -126,6 +143,7 @@ export const handler = {
         _meta: {
           evaluationMs: evalDuration,
           totalMs: totalDuration,
+          usedJit,
           timestamp: new Date().toISOString(),
           fhirVersion: version || null,
         },
