@@ -33,6 +33,8 @@ import {
 } from "./terminology/mod.ts";
 import { globalFactory } from "./factory/mod.ts";
 import { FhirPathJIT, compileJIT, clearJITCache, type CompiledFhirPath, type JITOptions } from "./jit/mod.ts";
+import { inspect, type InspectOptions, type InspectResult } from "./inspect.ts";
+import { registry } from "./registry.ts";
 
 /**
  * API interface matching fhirpath.js
@@ -123,6 +125,36 @@ export interface FhirPathAPI {
    * Clear the JIT compilation cache (atollee extension)
    */
   clearJITCache(): void;
+
+  /**
+   * Inspect a FHIRPath expression with debugging information (atollee extension)
+   * 
+   * Evaluates an expression while capturing traces, timing, and AST.
+   * 
+   * @example
+   * ```typescript
+   * const result = fhirpath.inspect("name.trace('names').given.first()", {
+   *   input: patient
+   * });
+   * console.log(result.traces);        // Trace entries
+   * console.log(result.executionTime); // Execution time in ms
+   * ```
+   */
+  inspect(
+    expression: string,
+    options: InspectOptions,
+  ): InspectResult;
+
+  /**
+   * Registry for introspecting available functions and operators (atollee extension)
+   * 
+   * @example
+   * ```typescript
+   * const functions = fhirpath.registry.listFunctions();
+   * const whereFunc = fhirpath.registry.getFunction('where');
+   * ```
+   */
+  registry: typeof registry;
 }
 
 /**
@@ -369,5 +401,16 @@ export function createDefaultAPI(): FhirPathAPI {
     clearJITCache() {
       clearJITCache();
     },
+
+    // Inspect API (atollee extension)
+    inspect(
+      expression: string,
+      options: InspectOptions,
+    ): InspectResult {
+      return inspect(expression, options);
+    },
+
+    // Registry (atollee extension)
+    registry,
   };
 }

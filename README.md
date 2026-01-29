@@ -2,7 +2,7 @@
 
 A modern, high-performance FHIRPath implementation in TypeScript - designed as a drop-in replacement for `fhirpath.js` with significant performance improvements.
 
-**Version:** 0.7.5  
+**Version:** 0.7.6  
 **Tests:** 580+ test cases (including official HL7 FHIRPath test suite)  
 **License:** MIT
 
@@ -73,6 +73,8 @@ The standard `fhirpath.js` library (HL7/fhirpath.js) is the reference implementa
 | `version` | ✅ | ✅ | Different version string |
 | `getCacheStats()` | ❌ | ✅ | atollee extension |
 | `clearCache()` | ❌ | ✅ | atollee extension |
+| `inspect()` | ❌ | ✅ | atollee extension - debugging |
+| `registry` | ❌ | ✅ | atollee extension - introspection |
 
 ### Performance Comparison
 
@@ -450,6 +452,12 @@ interface FhirPathAPI {
   getCacheStats(): CacheStats;
   clearCache(): void;
   createEngine(options?: EngineOptions): FhirPathEngine;
+  compileJIT<T>(path: string, options?: JITOptions): CompiledFhirPath<T>;
+  clearJITCache(): void;
+  
+  // v0.7.6: Debugging & Introspection
+  inspect(expression: string, options: InspectOptions): InspectResult;
+  registry: FunctionRegistry;
 }
 ```
 
@@ -509,6 +517,118 @@ class FhirPathWorkerPool {
   getStats(): WorkerPoolStats;
 }
 ```
+
+### Inspect API (v0.7.6) - Debugging
+
+Evaluates expressions with debugging information including traces, timing, and AST.
+
+```typescript
+import { inspect, formatTraces } from "@atollee/fhirpath-atollee";
+
+const patient = {
+  resourceType: "Patient",
+  name: [{ family: "Smith", given: ["John", "James"] }]
+};
+
+// Debug expression with trace() calls
+const result = inspect(
+  "name.trace('names').given.trace('given names').first()",
+  { input: patient }
+);
+
+console.log(result.result);        // ["John"]
+console.log(result.executionTime); // 0.52 (ms)
+console.log(result.traces);        // Trace entries with timing
+
+// Format traces for console
+console.log(formatTraces(result.traces));
+// Traces:
+//   names: [1 items] (0.12ms)
+//   given names: [2 items] (0.34ms)
+
+// With variables
+const result2 = inspect(
+  "name.where(use = %targetUse).given",
+  { 
+    input: patient,
+    variables: { targetUse: "official" }
+  }
+);
+
+// Create reusable inspector
+import { createInspector } from "@atollee/fhirpath-atollee";
+
+const inspectPatient = createInspector({ input: patient });
+const r1 = inspectPatient("name.family");
+const r2 = inspectPatient("birthDate");
+```
+
+**InspectResult Interface:**
+
+```typescript
+interface InspectResult {
+  result: unknown[];       // Evaluation result
+  expression: string;      // Original expression
+  ast: ASTNode;           // Parsed AST
+  executionTime: number;  // Time in milliseconds
+  traces: TraceEntry[];   // All trace() captures
+  errors?: Error[];       // Any errors
+}
+
+interface TraceEntry {
+  name: string;           // Label from trace('label')
+  values: unknown[];      // Values at that point
+  timestamp: number;      // Time since start (ms)
+  depth: number;          // Nesting depth
+}
+```
+
+### Registry API (v0.7.6) - Introspection
+
+Provides introspection for available FHIRPath functions and operators.
+
+```typescript
+import { registry } from "@atollee/fhirpath-atollee";
+
+// List all functions
+const functions = registry.listFunctions();
+console.log(functions.length); // 60+
+
+// Get function details
+const whereFunc = registry.getFunction("where");
+// {
+//   name: "where",
+//   category: "Filtering",
+//   description: "Filters the collection...",
+//   signatures: [{ parameters: [...], returnType: "Collection" }]
+// }
+
+// Filter by category
+const stringFuncs = registry.listFunctions({ category: "String" });
+const v3Funcs = registry.listFunctions({ specVersion: "3.0.0-ballot" });
+
+// List operators
+const operators = registry.listOperators();
+const plus = registry.getOperator("+");
+// { symbol: "+", name: "addition", precedence: 4, ... }
+
+// Search functions
+const searchResults = registry.searchFunctions("string");
+
+// Get statistics
+const stats = registry.getStats();
+// { functions: 64, operators: 23, categories: 12 }
+
+// Group by category
+const byCategory = registry.getFunctionsByCategory();
+// { String: [...], Math: [...], Filtering: [...], ... }
+```
+
+**Use Cases:**
+- Playground autocomplete
+- Documentation generation
+- IDE integration
+- Expression validation hints
 
 ### JIT Compiler (v0.7.0)
 

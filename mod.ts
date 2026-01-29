@@ -157,6 +157,27 @@ export {
   type AnalysisResult,
 } from "./src/optimizer/mod.ts";
 
+// Export Inspect API (debugging & introspection)
+export {
+  inspect,
+  formatTraces,
+  createInspector,
+  type InspectOptions,
+  type InspectResult,
+  type TraceEntry,
+} from "./src/inspect.ts";
+
+// Export Registry API (function & operator introspection)
+export {
+  registry,
+  type FunctionDefinition,
+  type FunctionSignature,
+  type FunctionParameter,
+  type FunctionCategory,
+  type OperatorDefinition,
+  type OperatorCategory,
+} from "./src/registry.ts";
+
 // Export FHIR R6-compliant Logging System
 export {
   createLogger,
