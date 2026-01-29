@@ -2,6 +2,7 @@ import { define } from "../utils.ts";
 import { Partial } from "fresh/runtime";
 import ThemeToggle from "../islands/ThemeToggle.tsx";
 import LanguageSwitcher from "../islands/LanguageSwitcher.tsx";
+import { Footer } from "../islands/TranslatedContent.tsx";
 
 export default define.page(function App({ Component, url }) {
   // Dark mode script to run before render (prevents flash)
@@ -103,11 +104,7 @@ export default define.page(function App({ Component, url }) {
         
         <footer class="border-t border-slate-200 dark:border-slate-700 mt-8 bg-white dark:bg-slate-800">
           <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <p class="text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-              fhirpath-atollee - High-performance FHIRPath for TypeScript
-              {" • "}
-              <a href="https://atollee.com" class="link-atollee hover:underline">atollee</a>
-            </p>
+            <Footer />
           </div>
         </footer>
       </body>
