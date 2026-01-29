@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "preact/hooks";
 import type { AnalysisResult } from "../../../src/optimizer/mod.ts";
+import MonacoEditor from "./MonacoEditor.tsx";
 
 interface HistoryEntry {
   expression: string;
@@ -78,6 +79,16 @@ export default function PlaygroundIsland({
   const [showHistory, setShowHistory] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  // Detect dark mode
+  useEffect(() => {
+    const checkDark = () => setIsDark(document.documentElement.classList.contains("dark"));
+    checkDark();
+    const observer = new MutationObserver(checkDark);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -296,12 +307,12 @@ export default function PlaygroundIsland({
                 )}
               </div>
             </div>
-            <input
-              type="text"
+            <MonacoEditor
               value={expression}
-              onInput={(e) => setExpression((e.target as HTMLInputElement).value)}
-              class="w-full px-3 py-2 font-mono text-sm border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[rgb(30,210,255)] focus:border-transparent"
-              placeholder="Enter FHIRPath expression..."
+              onChange={setExpression}
+              onSubmit={evaluate}
+              isDark={isDark}
+              height="38px"
             />
             {/* Sample Expressions - scrollable on mobile */}
             <div class="flex flex-wrap gap-1.5 mt-2 max-h-20 overflow-y-auto">
