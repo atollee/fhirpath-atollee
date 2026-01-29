@@ -3,7 +3,10 @@
  * 
  * Supports FHIR R4/R4B/R5/R6 type checking
  * No mocks, no simulation - real FHIRPath evaluation
- * Includes comparison with fhirpath.js for performance benchmarking
+ * Optional comparison with fhirpath.js for performance benchmarking
+ * 
+ * Note: fhirpath.js uses ANTLR4 which has known issues in Deno runtime.
+ * The comparison feature is best-effort and may not work for all expressions.
  * 
  * @see https://hl7.org/fhir/fhirpath.html
  */
@@ -12,8 +15,31 @@ import { parseFhirPath } from "../../../../src/parser/mod.ts";
 import { analyzeExpression } from "../../../../src/optimizer/mod.ts";
 import { compileJIT, type CompiledFhirPath } from "../../../../src/jit/mod.ts";
 import { loggers } from "../../../../src/logging.ts";
-// Import fhirpath.js for comparison
-import fhirpathJs from "npm:fhirpath@3.16.0";
+
+// fhirpath.js comparison is optional - ANTLR4 has known issues in Deno
+// deno-lint-ignore no-explicit-any
+let fhirpathJs: any = null;
+let fhirpathJsLoadError: string | null = null;
+
+// Lazy load fhirpath.js on first use
+async function loadFhirpathJs() {
+  if (fhirpathJs !== null || fhirpathJsLoadError !== null) {
+    return fhirpathJs;
+  }
+  
+  try {
+    const module = await import("npm:fhirpath@4.8.3");
+    fhirpathJs = module.default || module;
+    return fhirpathJs;
+  } catch (e) {
+    fhirpathJsLoadError = e instanceof Error ? e.message : String(e);
+    log.warning("fhirpath.js load failed (ANTLR4/Deno incompatibility)", {
+      code: "dependency",
+      details: fhirpathJsLoadError,
+    });
+    return null;
+  }
+}
 
 // Import FHIR models
 import r4Model from "../../../../fhir-context/r4/mod.ts";
@@ -136,23 +162,35 @@ export const handler = {
         });
       }
 
-      // Benchmark fhirpath.js for comparison (if no error)
-      let fhirpathJsError: string | null = null;
-      if (!error) {
+      // Benchmark fhirpath.js for comparison (if no error and fhirpath.js available)
+      let fhirpathJsError: string | null = fhirpathJsLoadError;
+      if (!error && !fhirpathJsLoadError) {
         try {
-          let compiledFn = fhirpathJsCache.get(expression);
-          if (!compiledFn) {
-            compiledFn = fhirpathJs.compile(expression);
-            fhirpathJsCache.set(expression, compiledFn);
+          // Lazy load fhirpath.js
+          const fp = await loadFhirpathJs();
+          if (!fp) {
+            fhirpathJsError = fhirpathJsLoadError || "fhirpath.js not available in Deno runtime";
+          } else {
+            let compiledFn = fhirpathJsCache.get(expression);
+            if (!compiledFn) {
+              compiledFn = fp.compile(expression);
+              fhirpathJsCache.set(expression, compiledFn);
+            }
+            
+            const fhirpathJsStart = performance.now();
+            compiledFn(resource || {}, context || {});
+            fhirpathJsDuration = performance.now() - fhirpathJsStart;
           }
-          
-          const fhirpathJsStart = performance.now();
-          compiledFn(resource || {}, context || {});
-          fhirpathJsDuration = performance.now() - fhirpathJsStart;
         } catch (e) {
-          // fhirpath.js evaluation failed - capture error
+          // fhirpath.js evaluation failed - capture error (often ANTLR4 issues)
           fhirpathJsDuration = null;
-          fhirpathJsError = e instanceof Error ? e.message : String(e);
+          const errorMsg = e instanceof Error ? e.message : String(e);
+          // Provide user-friendly message for common ANTLR4 errors
+          if (errorMsg.includes("getRuleContext")) {
+            fhirpathJsError = "ANTLR4 runtime issue (Deno incompatibility)";
+          } else {
+            fhirpathJsError = errorMsg;
+          }
         }
       }
 

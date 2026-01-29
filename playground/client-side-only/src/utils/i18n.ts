@@ -10,36 +10,23 @@ export const STORAGE_KEY = "fhirpath-playground-lang";
 export const DEFAULT_LANGUAGE: Language = "en";
 
 export interface Translations {
-  // Navigation
   nav: {
     playground: string;
     github: string;
     spec: string;
     toggleDark: string;
   };
-  // Main headings
   headings: {
     title: string;
     subtitle: string;
     resource: string;
     expression: string;
   };
-  // Features
   features: {
-    performance: {
-      title: string;
-      description: string;
-    };
-    optimization: {
-      title: string;
-      description: string;
-    };
-    history: {
-      title: string;
-      description: string;
-    };
+    performance: { title: string; description: string };
+    optimization: { title: string; description: string };
+    history: { title: string; description: string };
   };
-  // Playground
   playground: {
     favorite: string;
     removeFavorite: string;
@@ -64,7 +51,6 @@ export interface Translations {
     fhirRelease: string;
     fhirReleaseTooltip: string;
   };
-  // Sample expressions (legacy - keep for backwards compatibility)
   samples: {
     givenNames: string;
     officialName: string;
@@ -74,7 +60,6 @@ export interface Translations {
     identifiers: string;
     typeCheck: string;
   };
-  // Categorized sample expressions
   sampleCategories: {
     basic: string;
     existence: string;
@@ -90,7 +75,6 @@ export interface Translations {
     boolean: string;
     utility: string;
   };
-  // Footer
   footer: string;
 }
 
