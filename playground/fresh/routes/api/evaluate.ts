@@ -87,10 +87,15 @@ export const handler = {
       // Evaluate - use model-aware engine if FHIR version specified
       let result = null;
       let error = null;
+      let evalDuration = 0;
 
       try {
         const engine = version ? getEngine(version) : defaultEngine;
+        
+        // Measure ONLY the FHIRPath evaluation time
+        const evalStart = performance.now();
         result = engine.evaluate(resource || {}, expression, context);
+        evalDuration = performance.now() - evalStart;
       } catch (e) {
         error = e instanceof Error ? e.message : String(e);
         log.warning("Evaluation error", {
@@ -100,9 +105,9 @@ export const handler = {
         });
       }
 
-      const duration = performance.now() - startTime;
+      const totalDuration = performance.now() - startTime;
       
-      log.perf("Expression evaluated", duration, {
+      log.perf("Expression evaluated", evalDuration, {
         details: {
           expression: expression.length > 50 ? expression.slice(0, 50) + "..." : expression,
           resultCount: Array.isArray(result) ? result.length : result ? 1 : 0,
@@ -119,7 +124,8 @@ export const handler = {
           ast,
         },
         _meta: {
-          evaluationMs: duration,
+          evaluationMs: evalDuration,
+          totalMs: totalDuration,
           timestamp: new Date().toISOString(),
           fhirVersion: version || null,
         },
