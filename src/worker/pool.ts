@@ -90,6 +90,8 @@ export class FhirPathWorkerPool {
       };
 
       worker.onerror = (error) => {
+        // Worker errors must be logged to console for debugging
+        // deno-lint-ignore no-console
         console.error("Worker error:", error);
         this.handleWorkerError(managed, error);
       };

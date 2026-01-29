@@ -160,12 +160,7 @@ export function registerFhirPathLanguage(
     },
   });
 
-  // Setup validation if enabled
-  if (validation) {
-    // Note: This would typically be connected to the editor instance
-    // Here we export a helper function that users can call
-    console.log(`FHIRPath language registered with validation enabled (delay: ${validationDelay}ms)`);
-  }
+  // Validation is enabled - users can call setupFhirPathValidation() with their editor model
 }
 
 /**
