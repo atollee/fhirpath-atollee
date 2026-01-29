@@ -131,10 +131,10 @@ export default define.page(function PlaygroundPage({ url }) {
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
           <h3 class="font-semibold text-gray-900 dark:text-white mb-2">
-            📤 Easy Sharing
+            📋 History & Favorites
           </h3>
           <p class="text-sm text-gray-600 dark:text-gray-400">
-            Share expressions via URL. History and favorites persist locally. 
+            Copy expressions to clipboard. History and favorites persist locally. 
             Perfect for documentation and debugging.
           </p>
         </div>

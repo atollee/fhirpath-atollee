@@ -205,21 +205,16 @@ export default function PlaygroundIsland({
     }
   }, [expression, favorites, saveFavorites]);
 
-  // Copy shareable URL
-  const copyShareableURL = useCallback(async () => {
-    const params = new URLSearchParams();
-    params.set("expr", expression);
-    if (resourceJson !== JSON.stringify(DEFAULT_PATIENT, null, 2)) {
-      params.set("resource", resourceJson);
-    }
-    const url = `${window.location.origin}${window.location.pathname}?${params}`;
+  // Copy expression to clipboard
+  const copyExpression = useCallback(async () => {
+    if (!expression.trim()) return;
     
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(expression);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch { /* ignore */ }
-  }, [expression, resourceJson]);
+  }, [expression]);
 
   // Format time ago
   const formatTimeAgo = (ts: number) => {
@@ -236,21 +231,9 @@ export default function PlaygroundIsland({
     <div class="space-y-3">
       {/* Resource Input - FIRST */}
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
-        <div class="flex justify-between items-center mb-2">
-          <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
-            Resource (JSON)
-          </h3>
-          <button
-            onClick={copyShareableURL}
-            class={`px-2 py-1 text-xs rounded ${
-              copied
-                ? "bg-green-600 text-white"
-                : "bg-blue-600 text-white hover:bg-blue-700"
-            }`}
-          >
-            {copied ? "✓ Copied!" : "🔗 Share"}
-          </button>
-        </div>
+        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
+          Resource (JSON)
+        </h3>
         <textarea
           value={resourceJson}
           onInput={(e) => setResourceJson((e.target as HTMLTextAreaElement).value)}
@@ -270,6 +253,17 @@ export default function PlaygroundIsland({
             title={isFavorited ? "Remove from favorites" : "Add to favorites"}
           >
             {isFavorited ? "★" : "☆"}
+          </button>
+          <button
+            onClick={copyExpression}
+            class={`px-2 py-0.5 text-xs rounded ${
+              copied
+                ? "bg-green-600 text-white"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+            }`}
+            title="Copy expression"
+          >
+            {copied ? "✓" : "📋"}
           </button>
           {/* History dropdown */}
           <div class="relative ml-auto">
