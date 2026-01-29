@@ -244,7 +244,7 @@ export default function MonacoEditor({
         lineNumbers: "off",
         glyphMargin: false,
         folding: false,
-        lineDecorationsWidth: 0,
+        lineDecorationsWidth: 8,
         lineNumbersMinChars: 0,
         scrollBeyondLastLine: false,
         renderLineHighlight: "none",
