@@ -688,7 +688,7 @@ PLAYGROUND_PORT=8080 deno task dev
 For deployments without a server (GitHub Pages, CDN, S3):
 
 ```bash
-# Development
+# Development (requires Fresh Playground running on port 11100)
 cd packages/fhirpath-atollee/playground/client-side-only
 deno task dev
 
@@ -698,10 +698,27 @@ deno task build
 # Deploy the `dist/` folder to any static host
 ```
 
+**Hosted Playground:**
+- **GitHub Pages:** https://atollee.github.io/fhirpath-atollee/
+- **GitLab Pages:** https://fhir.atollee.com/fhirpath-atollee/
+
+**Client-Side Architecture:**
+The client-side playground loads `fhirpath-atollee` directly in the browser via ESM:
+
+```typescript
+// Browser loads fhirpath-atollee from JSR via esm.sh
+import { evaluate } from 'https://esm.sh/jsr/@atollee/fhirpath-atollee';
+
+const result = evaluate(patient, 'name.given');
+```
+
+**Note:** Full client-side evaluation requires `fhirpath-atollee` to be published on JSR or npm. 
+Until then, the playground uses the Fresh API for evaluation when running locally.
+
 **Client-Side Features:**
 - Pure static deployment (no server required)
-- Vite + Preact build
-- Requires `fhirpath-atollee` via ESM import from CDN or npm bundle
+- Vite + Preact build (~46KB JS, ~18KB CSS gzipped)
+- ESM import from JSR: `jsr:@atollee/fhirpath-atollee`
 - GitHub Pages ready via `.github/workflows/deploy-playground.yml`
 
 #### Option 3: Web Component (Embeddable)
