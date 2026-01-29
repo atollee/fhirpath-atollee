@@ -313,8 +313,14 @@ export default function MonacoEditor({
       )}
       <div
         ref={containerRef}
-        class="w-full rounded-md border border-slate-300 dark:border-slate-600 overflow-hidden"
-        style={{ height, minHeight: height }}
+        class="w-full rounded-md border border-slate-300 dark:border-slate-600 overflow-hidden p-1"
+        style={{ 
+          height, 
+          minHeight: height, 
+          maxHeight: "300px",
+          resize: "vertical",
+          overflow: "auto"
+        }}
       />
     </div>
   );
