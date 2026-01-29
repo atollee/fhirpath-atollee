@@ -1,0 +1,49 @@
+{
+  "name": "@atollee/fhirpath",
+  "version": "0.7.1",
+  "description": "High-performance FHIRPath implementation in TypeScript - drop-in replacement for fhirpath.js",
+  "license": "MIT",
+  "imports": {
+    "fhirpath": "npm:fhirpath@4.8.3"
+  },
+  "exports": {
+    ".": "./mod.ts",
+    "./worker": "./src/worker/mod.ts",
+    "./terminology": "./src/terminology/mod.ts",
+    "./factory": "./src/factory/mod.ts",
+    "./streaming": "./src/streaming.ts",
+    "./jit": "./src/jit/mod.ts",
+    "./monaco": "./src/monaco/mod.ts",
+    "./optimizer": "./src/optimizer/mod.ts"
+  },
+  "publish": {
+    "include": [
+      "mod.ts",
+      "src/**/*.ts",
+      "README.md",
+      "LICENSE"
+    ],
+    "exclude": [
+      "**/*_test.ts",
+      "**/tests/**",
+      "**/benchmarks/**",
+      "**/*.bench.ts",
+      "FhirPathAtolleePlugin.ts",
+      "FhirPathAtolleePlugin.ts.disabled",
+      "visual-builder/**",
+      "playground/**",
+      "fhir-context/**"
+    ]
+  },
+  "tasks": {
+    "test": "deno test -A --no-check tests/",
+    "bench": "deno bench -A --no-check benchmarks/",
+    "check": "deno check mod.ts",
+    "publish:dry": "deno publish --dry-run",
+    "build:npm": "deno run -A scripts/build-npm.ts"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true
+  }
+}
