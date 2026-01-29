@@ -83,6 +83,7 @@ export default function PlaygroundIsland({
   const [isDark, setIsDark] = useState(false);
   const [lang, setLang] = useState<Language>(DEFAULT_LANGUAGE);
   const [t, setT] = useState<Translations>(getTranslations(DEFAULT_LANGUAGE));
+  const [fhirVersion, setFhirVersion] = useState<"r4" | "r4b" | "r5" | "r6">("r6");
 
   // Detect language
   useEffect(() => {
@@ -180,7 +181,7 @@ export default function PlaygroundIsland({
       const response = await fetch("/api/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ expression, resource }),
+        body: JSON.stringify({ expression, resource, fhirVersion }),
       });
 
       const data = await response.json();
@@ -265,9 +266,24 @@ export default function PlaygroundIsland({
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-stretch">
         {/* Resource Input */}
         <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-3 flex flex-col">
-          <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
-            {t.headings.resource}
-          </h3>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+              {t.headings.resource}
+            </h3>
+            <div class="flex items-center gap-1.5" title={t.playground.fhirReleaseTooltip}>
+              <span class="text-xs text-slate-400 dark:text-slate-500">{t.playground.fhirRelease}</span>
+              <select
+                value={fhirVersion}
+                onChange={(e) => setFhirVersion((e.target as HTMLSelectElement).value as "r4" | "r4b" | "r5" | "r6")}
+                class="text-xs px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[rgb(30,210,255)]"
+              >
+                <option value="r4">R4</option>
+                <option value="r4b">R4B</option>
+                <option value="r5">R5</option>
+                <option value="r6">R6</option>
+              </select>
+            </div>
+          </div>
           <textarea
             value={resourceJson}
             onInput={(e) => setResourceJson((e.target as HTMLTextAreaElement).value)}

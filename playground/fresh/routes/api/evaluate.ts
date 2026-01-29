@@ -1,18 +1,48 @@
 /**
  * FHIRPath Evaluate API Endpoint
  * 
- * FHIR R6-compliant expression evaluation
+ * Supports FHIR R4/R4B/R5/R6 type checking
  * No mocks, no simulation - real FHIRPath evaluation
  * 
- * @see https://hl7.org/fhir/6.0.0-ballot4/fhirpath.html
+ * @see https://hl7.org/fhir/fhirpath.html
  */
-import { createDefaultAPI } from "../../../../src/api.ts";
+import { FhirPathEngine } from "../../../../src/engine.ts";
 import { parseFhirPath } from "../../../../src/parser/mod.ts";
 import { analyzeExpression } from "../../../../src/optimizer/mod.ts";
 import { loggers } from "../../../../src/logging.ts";
 
-const fhirpath = createDefaultAPI();
+// Import FHIR models
+import r4Model from "../../../../fhir-context/r4/mod.ts";
+import r4bModel from "../../../../fhir-context/r4b/mod.ts";
+import r5Model from "../../../../fhir-context/r5/mod.ts";
+import r6Model from "../../../../fhir-context/r6/mod.ts";
+
 const log = loggers.playground;
+
+// FHIR model cache
+const fhirModels = {
+  r4: r4Model,
+  r4b: r4bModel,
+  r5: r5Model,
+  r6: r6Model,
+} as const;
+
+type FhirVersion = keyof typeof fhirModels;
+
+// Engine cache (one per FHIR version)
+const engines = new Map<FhirVersion, FhirPathEngine>();
+
+function getEngine(version: FhirVersion): FhirPathEngine {
+  let engine = engines.get(version);
+  if (!engine) {
+    engine = new FhirPathEngine({ model: fhirModels[version] });
+    engines.set(version, engine);
+  }
+  return engine;
+}
+
+// Default engine (no model, for basic evaluation)
+const defaultEngine = new FhirPathEngine();
 
 export const handler = {
   async POST(req: Request): Promise<Response> {
@@ -20,7 +50,7 @@ export const handler = {
     
     try {
       const body = await req.json();
-      const { expression, resource, context = {} } = body;
+      const { expression, resource, context = {}, fhirVersion } = body;
 
       if (!expression || typeof expression !== "string") {
         log.warning("Invalid request: missing expression", {
@@ -32,6 +62,12 @@ export const handler = {
           { status: 400 }
         );
       }
+
+      // Validate FHIR version if provided
+      const validVersions: FhirVersion[] = ["r4", "r4b", "r5", "r6"];
+      const version = fhirVersion && validVersions.includes(fhirVersion) 
+        ? fhirVersion as FhirVersion 
+        : null;
 
       // Parse AST
       let ast = null;
@@ -48,12 +84,13 @@ export const handler = {
       // Analyze expression for optimization hints
       const analysis = analyzeExpression(expression);
 
-      // Evaluate - no mocks, real FHIRPath evaluation
+      // Evaluate - use model-aware engine if FHIR version specified
       let result = null;
       let error = null;
 
       try {
-        result = fhirpath.evaluate(resource || {}, expression, context);
+        const engine = version ? getEngine(version) : defaultEngine;
+        result = engine.evaluate(resource || {}, expression, context);
       } catch (e) {
         error = e instanceof Error ? e.message : String(e);
         log.warning("Evaluation error", {
@@ -70,6 +107,7 @@ export const handler = {
           expression: expression.length > 50 ? expression.slice(0, 50) + "..." : expression,
           resultCount: Array.isArray(result) ? result.length : result ? 1 : 0,
           jitCompatible: analysis.jitCompatible,
+          fhirVersion: version || "none",
         },
       });
 
@@ -83,6 +121,7 @@ export const handler = {
         _meta: {
           evaluationMs: duration,
           timestamp: new Date().toISOString(),
+          fhirVersion: version || null,
         },
       });
     } catch (e) {
