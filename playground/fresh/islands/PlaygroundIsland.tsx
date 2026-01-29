@@ -73,6 +73,7 @@ export default function PlaygroundIsland({
   const [error, setError] = useState<string | null>(initialError || null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [executionTime, setExecutionTime] = useState(0);
+  const [usedJit, setUsedJit] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"result" | "ast" | "hints">("result");
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -198,6 +199,7 @@ export default function PlaygroundIsland({
       setAnalysis(data.analysis || null);
       // Use server-side evaluation time (pure FHIRPath execution)
       setExecutionTime(data._meta?.evaluationMs ?? (performance.now() - startTime));
+      setUsedJit(data._meta?.usedJit ?? false);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       setResult(null);
@@ -501,13 +503,11 @@ export default function PlaygroundIsland({
               <span class="text-slate-500 dark:text-slate-400 hidden sm:inline">
                 📊 {t.playground.complexity}: {analysis.complexity}/100
               </span>
-              <span class={`px-2 py-0.5 rounded text-xs font-medium ${
-                analysis.jitCompatible
-                  ? "badge-jit"
-                  : "badge-warning"
-              }`}>
-                {analysis.jitCompatible ? `✓ ${t.playground.jit}` : `⚠ ${t.playground.noJit}`}
-              </span>
+              {usedJit && (
+                <span class="px-2 py-0.5 rounded text-xs font-medium badge-jit">
+                  ⚡ {t.playground.jit}
+                </span>
+              )}
             </>
           )}
         </div>
