@@ -36,8 +36,8 @@ export default define.page(function App({ Component, url }) {
         <meta name="twitter:title" content="FHIRPath Playground - atollee" />
         <meta name="twitter:description" content="Test FHIRPath expressions interactively" />
         
-        {/* Theme color for mobile browsers */}
-        <meta name="theme-color" content="#0891b2" />
+        {/* Theme color for mobile browsers - atollee ocean blue */}
+        <meta name="theme-color" content="rgb(30, 210, 255)" />
         
         <link rel="stylesheet" href="/styles.css" />
         
@@ -59,7 +59,7 @@ export default define.page(function App({ Component, url }) {
                     FHIRPath
                   </span>
                 </a>
-                <span class="px-2 py-0.5 text-xs font-medium bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-200 rounded hidden sm:inline">
+                <span class="badge-version px-2 py-0.5 text-xs font-medium rounded hidden sm:inline">
                   v0.7.1
                 </span>
               </div>
@@ -70,7 +70,7 @@ export default define.page(function App({ Component, url }) {
                   href="https://github.com/atollee/fhirpath-atollee"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+                  class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 link-atollee transition-colors"
                 >
                   GitHub
                 </a>
@@ -78,7 +78,7 @@ export default define.page(function App({ Component, url }) {
                   href="https://hl7.org/fhirpath/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors hidden sm:inline"
+                  class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 link-atollee transition-colors hidden sm:inline"
                 >
                   FHIRPath Spec
                 </a>
@@ -115,7 +115,7 @@ export default define.page(function App({ Component, url }) {
             <p class="text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400">
               fhirpath-atollee - High-performance FHIRPath for TypeScript
               {" • "}
-              <a href="https://atollee.com" class="text-cyan-600 dark:text-cyan-400 hover:underline">atollee</a>
+              <a href="https://atollee.com" class="link-atollee hover:underline">atollee</a>
             </p>
           </div>
         </footer>

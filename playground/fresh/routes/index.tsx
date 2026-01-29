@@ -73,7 +73,7 @@ export default define.page(function PlaygroundPage({ url }) {
           optimization hints, and JIT compiler support. Powered by{" "}
           <a 
             href="https://github.com/atollee/fhirpath-atollee" 
-            class="text-cyan-600 dark:text-cyan-400 hover:underline font-medium"
+            class="link-atollee hover:underline font-medium"
           >
             fhirpath-atollee
           </a>
@@ -113,7 +113,7 @@ export default define.page(function PlaygroundPage({ url }) {
       <div class="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4">
           <h3 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-            <span class="text-cyan-500">🚀</span> High Performance
+            <span class="text-atollee-ocean">🚀</span> High Performance
           </h3>
           <p class="text-sm text-slate-600 dark:text-slate-400">
             JIT compiler delivers 50-75x faster execution than fhirpath.js. 
@@ -122,7 +122,7 @@ export default define.page(function PlaygroundPage({ url }) {
         </div>
         <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4">
           <h3 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-            <span class="text-amber-500">💡</span> Smart Optimization
+            <span class="text-atollee-orange">💡</span> Smart Optimization
           </h3>
           <p class="text-sm text-slate-600 dark:text-slate-400">
             Real-time hints suggest improvements like using exists() instead of count() {">"} 0. 
@@ -131,7 +131,7 @@ export default define.page(function PlaygroundPage({ url }) {
         </div>
         <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:col-span-2 lg:col-span-1">
           <h3 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-            <span class="text-emerald-500">📋</span> History & Favorites
+            <span class="text-atollee-sea">📋</span> History & Favorites
           </h3>
           <p class="text-sm text-slate-600 dark:text-slate-400">
             Copy expressions to clipboard. History and favorites persist locally. 

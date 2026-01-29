@@ -2,18 +2,28 @@
 
 /* atollee Brand Colors */
 :root {
-  /* Primary: Cyan/Teal - Healthcare/FHIR typical */
-  --atollee-primary: #0891b2;
-  --atollee-primary-light: #22d3ee;
-  --atollee-primary-dark: #0e7490;
+  /* atollee official colors */
+  --atollee-yellow: rgb(255, 255, 50);
+  --atollee-orange: rgb(250, 120, 0);
+  --atollee-blue: rgb(35, 120, 255);
+  --atollee-oceanblue: rgb(30, 210, 255);
+  --atollee-seagreen: rgb(0, 215, 215);
+  --atollee-darkgray: rgb(80, 75, 70);
+  --atollee-gray: rgb(160, 165, 170);
+  --atollee-black: rgb(0, 0, 0);
   
-  /* Accent */
-  --atollee-accent: #06b6d4;
-  --atollee-accent-light: #67e8f9;
+  /* Primary: Ocean Blue / Sea Green */
+  --atollee-primary: var(--atollee-oceanblue);
+  --atollee-primary-light: var(--atollee-seagreen);
+  --atollee-primary-dark: var(--atollee-blue);
+  
+  /* Accent: Orange */
+  --atollee-accent: var(--atollee-orange);
+  --atollee-accent-light: var(--atollee-yellow);
   
   /* Semantic */
   --atollee-success: #10b981;
-  --atollee-warning: #f59e0b;
+  --atollee-warning: var(--atollee-orange);
   --atollee-error: #ef4444;
   
   /* Light mode */
@@ -22,18 +32,18 @@
   --bg-tertiary: #f1f5f9;
   --text-primary: #0f172a;
   --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-muted: var(--atollee-gray);
   --border-color: #e2e8f0;
 }
 
 .dark {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
+  --bg-primary: var(--atollee-black);
+  --bg-secondary: rgb(15, 15, 15);
+  --bg-tertiary: var(--atollee-darkgray);
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
-  --text-muted: #64748b;
-  --border-color: #334155;
+  --text-muted: var(--atollee-gray);
+  --border-color: var(--atollee-darkgray);
 }
 
 /* Apply theme colors */
@@ -95,23 +105,122 @@ button, a, .transition-theme {
 /* atollee branded components */
 .btn-primary {
   background-color: var(--atollee-primary);
-  color: white;
+  color: var(--atollee-black);
 }
 
 .btn-primary:hover {
   background-color: var(--atollee-primary-dark);
 }
 
+/* Text colors */
 .text-atollee {
   color: var(--atollee-primary);
 }
 
+.text-atollee-ocean {
+  color: var(--atollee-oceanblue);
+}
+
+.text-atollee-sea {
+  color: var(--atollee-seagreen);
+}
+
+.text-atollee-blue {
+  color: var(--atollee-blue);
+}
+
+.text-atollee-orange {
+  color: var(--atollee-orange);
+}
+
+.text-atollee-yellow {
+  color: var(--atollee-yellow);
+}
+
+/* Background colors */
 .bg-atollee {
   background-color: var(--atollee-primary);
 }
 
+.bg-atollee-dark {
+  background-color: var(--atollee-darkgray);
+}
+
+/* Border colors */
 .border-atollee {
   border-color: var(--atollee-primary);
+}
+
+/* Link styling with atollee colors */
+a.link-atollee,
+.link-atollee {
+  color: var(--atollee-oceanblue);
+}
+
+a.link-atollee:hover,
+.link-atollee:hover {
+  color: var(--atollee-seagreen);
+}
+
+.dark a.link-atollee,
+.dark .link-atollee {
+  color: var(--atollee-seagreen);
+}
+
+.dark a.link-atollee:hover,
+.dark .link-atollee:hover {
+  color: var(--atollee-oceanblue);
+}
+
+/* Code/result text with atollee colors */
+.code-result {
+  color: var(--atollee-oceanblue);
+}
+
+.dark .code-result {
+  color: var(--atollee-seagreen);
+}
+
+/* Tab active state */
+.tab-active {
+  border-color: var(--atollee-oceanblue);
+  color: var(--atollee-oceanblue);
+}
+
+.dark .tab-active {
+  border-color: var(--atollee-seagreen);
+  color: var(--atollee-seagreen);
+}
+
+/* Version badge */
+.badge-version {
+  background-color: rgba(30, 210, 255, 0.15);
+  color: var(--atollee-oceanblue);
+}
+
+.dark .badge-version {
+  background-color: rgba(0, 215, 215, 0.2);
+  color: var(--atollee-seagreen);
+}
+
+/* JIT badge */
+.badge-jit {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.dark .badge-jit {
+  background-color: rgba(16, 185, 129, 0.2);
+}
+
+/* Warning badge */
+.badge-warning {
+  background-color: rgba(250, 120, 0, 0.15);
+  color: var(--atollee-orange);
+}
+
+.dark .badge-warning {
+  background-color: rgba(250, 120, 0, 0.2);
 }
 
 /* Dark mode toggle animation */
