@@ -693,11 +693,14 @@ Interactive playground for testing FHIRPath expressions with **two deployment op
 #### Option 2: Server-Side Rendered (Deno Fresh 2.2.0)
 
 ```bash
-# Start the SSR playground
+# Start the SSR playground (default port: 11100)
 cd packages/fhirpath-atollee/playground/fresh
 deno task dev
 
-# Open http://localhost:8080
+# Open http://localhost:11100
+
+# Use custom port with PLAYGROUND_PORT environment variable
+PLAYGROUND_PORT=8080 deno task dev
 ```
 
 **SSR Features:**
