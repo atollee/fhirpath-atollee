@@ -157,5 +157,24 @@ export {
   type AnalysisResult,
 } from "./src/optimizer/mod.ts";
 
+// Export FHIR R6-compliant Logging System
+export {
+  createLogger,
+  configureLogger,
+  addLogHandler,
+  removeLogHandler,
+  getLogBuffer,
+  clearLogBuffer,
+  getLogsBySource,
+  getLogsByLevel,
+  loggers,
+  ideHandler,
+  jsonHandler,
+  type LogLevel,
+  type LogEntry,
+  type LogHandler,
+  type LoggerConfig,
+} from "./src/logging.ts";
+
 // Note: FhirPathAtolleePlugin must be imported directly for HealthRuntime integration:
 // import { FhirPathAtolleePlugin } from "@atollee/fhirpath/FhirPathAtolleePlugin.ts";

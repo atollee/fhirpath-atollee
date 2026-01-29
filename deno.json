@@ -14,7 +14,8 @@
     "./streaming": "./src/streaming.ts",
     "./jit": "./src/jit/mod.ts",
     "./monaco": "./src/monaco/mod.ts",
-    "./optimizer": "./src/optimizer/mod.ts"
+    "./optimizer": "./src/optimizer/mod.ts",
+    "./logging": "./src/logging.ts"
   },
   "publish": {
     "include": [

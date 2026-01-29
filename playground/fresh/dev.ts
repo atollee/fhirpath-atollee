@@ -3,6 +3,12 @@
  * FHIRPath Playground Development Server
  * 
  * Using Deno Fresh 2.2.0 with Tailwind CSS
+ * FHIR R6-compliant: https://hl7.org/fhir/6.0.0-ballot4
+ * 
+ * Design:
+ * - No mocks, no simulation - real FHIRPath evaluation
+ * - Edge-first, serverless-compatible
+ * - IDE-friendly logging (not terminal spam)
  * 
  * Usage:
  *   deno task playground:dev
@@ -11,11 +17,23 @@
  */
 import { tailwind } from "@fresh/plugin-tailwind";
 import { Builder } from "fresh/dev";
+import { configureLogger, addLogHandler, ideHandler } from "../../src/logging.ts";
+
+// Configure logging for IDE development
+configureLogger({
+  minLevel: "information",
+  enabled: true,
+});
+
+// Enable IDE-friendly log output in development
+if (Deno.env.get("DENO_ENV") === "development" || Deno.args.includes("--verbose")) {
+  addLogHandler(ideHandler);
+}
 
 const port = parseInt(Deno.env.get("PLAYGROUND_PORT") || "8080");
 
 console.log(`🔬 FHIRPath Playground starting...`);
-console.log(`📦 Version: 0.7.1`);
+console.log(`📦 Version: 0.7.2`);
 
 // Get the playground directory path
 const playgroundDir = new URL("./", import.meta.url).pathname;

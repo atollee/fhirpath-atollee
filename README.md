@@ -588,6 +588,74 @@ console.log(formatHints(result.hints));
 // - Multiple where() clauses (suggest combining)
 ```
 
+### FHIR R6-compliant Logging (v0.7.2)
+
+Professional logging system based on FHIR R6 OperationOutcome severity levels.
+Designed for IDE/video-coding development, not terminal spam.
+
+```typescript
+import { 
+  createLogger, 
+  configureLogger, 
+  addLogHandler, 
+  ideHandler,
+  jsonHandler,
+  getLogBuffer,
+  loggers 
+} from "@atollee/fhirpath-atollee/logging";
+
+// Use pre-configured module loggers
+loggers.parser.info("Parsing expression", { location: "name.given" });
+loggers.evaluator.warning("Slow evaluation detected", { duration: 150 });
+loggers.jit.perf("JIT compilation", 2.5);
+
+// Create custom logger for your plugin
+const log = createLogger("my-fhir-plugin");
+log.info("Plugin initialized");
+log.warning("Deprecated function used", { code: "deprecated" });
+log.error("Validation failed", { 
+  code: "invariant", 
+  location: "Patient.name",
+  details: { constraint: "name-1" }
+});
+
+// Configure global logging
+configureLogger({
+  minLevel: "warning",  // fatal | error | warning | information
+  enabled: true,
+});
+
+// Add handlers for different environments
+addLogHandler(ideHandler);   // IDE-friendly: ℹ️ [source] message (duration)
+addLogHandler(jsonHandler);  // Serverless: JSON lines
+
+// Access log buffer (for debugging tools)
+const recentLogs = getLogBuffer();
+const parserLogs = getLogsBySource("fhirpath-atollee/parser");
+const errors = getLogsByLevel("error");
+
+// Time async operations
+await log.time("Database query", async () => {
+  return await db.query(...);
+});
+```
+
+**Log Levels (FHIR R6 OperationOutcome.issue.severity):**
+
+| Level | Icon | Use Case |
+|-------|------|----------|
+| `fatal` | 💀 | Unrecoverable errors, system failure |
+| `error` | ❌ | Operation failed, invalid input |
+| `warning` | ⚠️ | Deprecation, performance issues |
+| `information` | ℹ️ | Progress, performance metrics |
+
+**Design Principles:**
+- No console spam - logs go to memory buffer by default
+- Plugin source identification in every message
+- Edge-first, serverless-compatible (no file I/O)
+- Zero external dependencies
+- Minimal overhead when disabled
+
 ### FHIRPath Playground (v0.7.2)
 
 Interactive playground for testing FHIRPath expressions with **two deployment options**:
