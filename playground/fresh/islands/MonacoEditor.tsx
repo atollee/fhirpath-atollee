@@ -23,8 +23,10 @@ interface MonacoEditor {
   getValue: () => string;
   setValue: (value: string) => void;
   onDidChangeModelContent: (callback: () => void) => { dispose: () => void };
+  onDidContentSizeChange: (callback: (e: { contentHeight: number }) => void) => { dispose: () => void };
   addCommand: (keybinding: number, handler: () => void) => void;
   getModel: () => { getOffsetAt: (pos: { lineNumber: number; column: number }) => number } | null;
+  getContentHeight: () => number;
   dispose: () => void;
   layout: () => void;
 }
@@ -33,7 +35,8 @@ interface MonacoEditorProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit?: () => void;
-  height?: string;
+  minHeight?: number;
+  maxHeight?: number;
   isDark?: boolean;
 }
 
@@ -117,7 +120,8 @@ export default function MonacoEditor({
   value, 
   onChange, 
   onSubmit,
-  height = "38px",
+  minHeight = 38,
+  maxHeight = 200,
   isDark = false,
 }: MonacoEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -125,6 +129,7 @@ export default function MonacoEditor({
   const monacoRef = useRef<Monaco | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [editorHeight, setEditorHeight] = useState(minHeight);
 
   // Load Monaco from CDN
   useEffect(() => {
@@ -250,7 +255,7 @@ export default function MonacoEditor({
         wordWrap: "on",
         fontSize: 14,
         fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-        padding: { top: 4, bottom: 4 },
+        padding: { top: 8, bottom: 8 },
         automaticLayout: true,
         suggestOnTriggerCharacters: true,
         quickSuggestions: true,
@@ -261,6 +266,18 @@ export default function MonacoEditor({
       editor.onDidChangeModelContent(() => {
         onChange(editor.getValue());
       });
+
+      // Handle auto-resize
+      const updateHeight = () => {
+        const contentHeight = editor.getContentHeight();
+        const newHeight = Math.min(Math.max(contentHeight, minHeight), maxHeight);
+        setEditorHeight(newHeight);
+        editor.layout();
+      };
+      
+      editor.onDidContentSizeChange(updateHeight);
+      // Initial height calculation
+      setTimeout(updateHeight, 50);
 
       // Handle Ctrl+Enter for submit
       if (onSubmit) {
@@ -307,20 +324,17 @@ export default function MonacoEditor({
   return (
     <div class="relative">
       {isLoading && (
-        <div class="absolute inset-0 flex items-center justify-center bg-slate-50 dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-600">
+        <div 
+          class="absolute inset-0 flex items-center justify-center bg-slate-50 dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-600"
+          style={{ minHeight: `${minHeight}px` }}
+        >
           <span class="text-sm text-slate-500">Loading editor...</span>
         </div>
       )}
       <div
         ref={containerRef}
-        class="w-full rounded-md border border-slate-300 dark:border-slate-600 overflow-hidden"
-        style={{ 
-          height, 
-          minHeight: height, 
-          maxHeight: "300px",
-          resize: "vertical",
-          overflow: "auto"
-        }}
+        class="w-full rounded-md border border-slate-300 dark:border-slate-600 overflow-hidden transition-[height] duration-100"
+        style={{ height: `${editorHeight}px`, minHeight: `${minHeight}px`, maxHeight: `${maxHeight}px` }}
       />
     </div>
   );
