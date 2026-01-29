@@ -36,3 +36,12 @@
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-slate-400 dark:bg-slate-500;
 }
+
+/* FHIRPath v3.0.0 STU indicator */
+.v3-stu {
+  @apply text-red-600 dark:text-red-400;
+}
+
+.v3-stu-badge {
+  @apply inline-block text-[0.6rem] px-1 ml-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded align-middle;
+}

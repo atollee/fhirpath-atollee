@@ -1545,6 +1545,13 @@ export class FhirPathEvaluator {
 
   private evalEnvVariable(node: EnvVariableNode): FhirPathCollection {
     const name = node.name;
+    // First check variables defined via defineVariable()
+    if (this.state.variables.has(name)) {
+      const varValue = this.state.variables.get(name);
+      if (varValue === undefined) return [];
+      return Array.isArray(varValue) ? varValue : [varValue];
+    }
+    // Then check environment variables
     const value = this.state.environment[name];
     if (value === undefined) return [];
     return Array.isArray(value) ? value : [value];

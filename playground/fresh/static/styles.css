@@ -388,6 +388,31 @@ a.link-atollee:hover,
   background-color: rgba(250, 120, 0, 0.2);
 }
 
+/* FHIRPath v3.0.0 STU indicator */
+.v3-stu {
+  color: #dc2626 !important; /* red-600 */
+}
+
+.dark .v3-stu {
+  color: #f87171 !important; /* red-400 */
+}
+
+.v3-stu-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  padding: 0 4px;
+  margin-left: 4px;
+  background-color: rgba(220, 38, 38, 0.15);
+  color: #dc2626;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+.dark .v3-stu-badge {
+  background-color: rgba(248, 113, 113, 0.2);
+  color: #f87171;
+}
+
 /* Dark mode toggle animation */
 .dark-mode-toggle {
   position: relative;

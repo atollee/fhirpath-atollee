@@ -57,7 +57,17 @@ const getSampleExpressions = (t: Translations) => [
   { label: t.samples.typeCheck, expression: '$this is Patient' },
 ];
 
-const getCategorizedExpressions = (t: Translations) => ({
+// Expression item with optional v3 flag for STU functions
+interface ExpressionItem {
+  label: string;
+  expr: string;
+  v3?: boolean; // true = FHIRPath v3.0.0 STU (not normative yet)
+}
+
+// Categorized expressions based on Supported Functions in README
+// Functions marked with v3: true are from FHIRPath v3.0.0 STU (Standard for Trial Use)
+// v2.0.0 is the current Normative Release (ANSI Standard since 2020)
+const getCategorizedExpressions = (t: Translations): Record<string, ExpressionItem[]> => ({
   [t.sampleCategories.basic]: [
     { label: 'Path navigation', expr: 'name.given' },
     { label: 'Property access', expr: 'birthDate' },
@@ -113,12 +123,12 @@ const getCategorizedExpressions = (t: Translations) => ({
     { label: 'replace()', expr: "name.family.replace('Doe', 'Smith')" },
     { label: 'matches()', expr: "name.family.matches('[A-Z].*')" },
     { label: 'replaceMatches()', expr: "name.family.replaceMatches('[aeiou]', '*')" },
-    { label: 'split()', expr: "'a,b,c'.split(',')" },
-    { label: 'join()', expr: "name.given.join(', ')" },
-    { label: 'trim()', expr: "'  hello  '.trim()" },
+    { label: 'split()', expr: "'a,b,c'.split(',')", v3: true },
+    { label: 'join()', expr: "name.given.join(', ')", v3: true },
+    { label: 'trim()', expr: "'  hello  '.trim()", v3: true },
     { label: 'toChars()', expr: "'abc'.toChars()" },
-    { label: 'encode()', expr: "'hello'.encode('base64')" },
-    { label: 'decode()', expr: "'aGVsbG8='.decode('base64')" },
+    { label: 'encode()', expr: "'hello'.encode('base64')", v3: true },
+    { label: 'decode()', expr: "'aGVsbG8='.decode('base64')", v3: true },
   ],
   [t.sampleCategories.math]: [
     { label: 'abs()', expr: '(-5).abs()' },
@@ -134,10 +144,10 @@ const getCategorizedExpressions = (t: Translations) => ({
   ],
   [t.sampleCategories.aggregate]: [
     { label: 'count()', expr: 'name.count()' },
-    { label: 'sum()', expr: '(1 | 2 | 3 | 4 | 5).sum()' },
-    { label: 'min()', expr: '(5 | 2 | 8 | 1).min()' },
-    { label: 'max()', expr: '(5 | 2 | 8 | 1).max()' },
-    { label: 'avg()', expr: '(10 | 20 | 30).avg()' },
+    { label: 'sum()', expr: '(1 | 2 | 3 | 4 | 5).sum()', v3: true },
+    { label: 'min()', expr: '(5 | 2 | 8 | 1).min()', v3: true },
+    { label: 'max()', expr: '(5 | 2 | 8 | 1).max()', v3: true },
+    { label: 'avg()', expr: '(10 | 20 | 30).avg()', v3: true },
     { label: 'aggregate() sum', expr: '(1 | 2 | 3).aggregate($total + $this, 0)' },
     { label: 'aggregate() product', expr: '(1 | 2 | 3 | 4).aggregate($total * $this, 1)' },
     { label: 'aggregate() concat', expr: "('a' | 'b' | 'c').aggregate($total & $this, '')" },
@@ -195,7 +205,8 @@ const getCategorizedExpressions = (t: Translations) => ({
     { label: 'now()', expr: 'now()' },
     { label: 'timeOfDay()', expr: 'timeOfDay()' },
     { label: 'trace()', expr: "name.trace('debug')" },
-    { label: 'defineVariable()', expr: "defineVariable('x', name.first()).select(%x.given)" },
+    { label: 'defineVariable()', expr: "defineVariable('x', name.first()).select(%x.given)", v3: true },
+    { label: 'type()', expr: 'name.type()', v3: true },
     { label: '$this', expr: "name.where($this.use = 'official')" },
     { label: '$index', expr: 'name.select($index)' },
     { label: '$total', expr: '(1|2|3).aggregate($total + $this, 0)' },
@@ -501,11 +512,22 @@ export function PlaygroundIsland({ isDark, lang }: PlaygroundIslandProps) {
                 </button>
               ))}
             </div>
+            {/* Legend for v3 STU */}
+            <div class="px-2 py-1 border-b border-slate-200 dark:border-slate-700 flex items-center justify-end gap-2 text-[10px]">
+              <span class="text-slate-400 dark:text-slate-500">
+                {lang === 'de' ? 'v2.0.0 = Normativ' : 'v2.0.0 = Normative'}
+              </span>
+              <span class="text-slate-300 dark:text-slate-600">│</span>
+              <span class="v3-stu font-medium">
+                {lang === 'de' ? 'v3.0.0 = STU (Entwurf)' : 'v3.0.0 = STU (Draft)'}
+              </span>
+            </div>
             <div class="max-h-40 overflow-y-auto p-2">
               {selectedCategory && (
                 <div class="grid grid-cols-2 gap-1">
                   {categorizedExpressions[selectedCategory]?.map((item) => {
                     const isActive = expression === item.expr;
+                    const isV3 = item.v3 === true;
                     return (
                       <button
                         key={item.expr}
@@ -515,9 +537,13 @@ export function PlaygroundIsland({ isDark, lang }: PlaygroundIslandProps) {
                             ? 'bg-blue-600 shadow-sm'
                             : 'hover:bg-slate-200 dark:hover:bg-slate-600'
                         }`}
+                        title={isV3 ? (lang === 'de' ? 'FHIRPath v3.0.0 STU (noch nicht normativ)' : 'FHIRPath v3.0.0 STU (not normative yet)') : undefined}
                       >
-                        <span class={`font-semibold ${isActive ? 'text-white' : 'text-slate-800 dark:text-slate-100'}`}>{item.label}</span>
-                        <code class={`block text-[10px] font-mono truncate ${isActive ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'}`}>
+                        <span class={`font-semibold ${isActive ? 'text-white' : isV3 ? 'v3-stu' : 'text-slate-800 dark:text-slate-100'}`}>
+                          {item.label}
+                          {isV3 && !isActive && <span class="v3-stu-badge">v3</span>}
+                        </span>
+                        <code class={`block text-[10px] font-mono truncate ${isActive ? 'text-blue-100' : isV3 ? 'v3-stu opacity-80' : 'text-slate-500 dark:text-slate-400'}`}>
                           {item.expr}
                         </code>
                       </button>
