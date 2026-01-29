@@ -49,6 +49,7 @@ const DEFAULT_PATIENT = {
   ],
 };
 
+// Legacy simple expressions (kept for quick access buttons)
 const getSampleExpressions = (t: Translations) => [
   { label: t.samples.givenNames, expression: "name.given" },
   { label: t.samples.officialName, expression: "name.where(use = 'official').given.first()" },
@@ -58,6 +59,119 @@ const getSampleExpressions = (t: Translations) => [
   { label: t.samples.identifiers, expression: "identifier.value" },
   { label: t.samples.typeCheck, expression: "$this is Patient" },
 ];
+
+// Categorized expressions based on Supported Functions in README
+const getCategorizedExpressions = (t: Translations) => ({
+  [t.sampleCategories.basic]: [
+    { label: "Path navigation", expr: "name.given" },
+    { label: "Property access", expr: "birthDate" },
+    { label: "Array index", expr: "name[0].family" },
+    { label: "Chained paths", expr: "name.given.first()" },
+  ],
+  [t.sampleCategories.existence]: [
+    { label: "empty()", expr: "name.empty()" },
+    { label: "exists()", expr: "name.exists()" },
+    { label: "exists(criteria)", expr: "name.exists(use = 'official')" },
+    { label: "all(criteria)", expr: "name.all(family.exists())" },
+    { label: "allTrue()", expr: "(true | true | true).allTrue()" },
+    { label: "anyTrue()", expr: "(false | true | false).anyTrue()" },
+    { label: "allFalse()", expr: "(false | false).allFalse()" },
+    { label: "anyFalse()", expr: "(true | false).anyFalse()" },
+  ],
+  [t.sampleCategories.filtering]: [
+    { label: "where()", expr: "name.where(use = 'official')" },
+    { label: "select()", expr: "name.select(given.first())" },
+    { label: "repeat()", expr: "name.repeat(given)" },
+    { label: "ofType()", expr: "children().ofType(HumanName)" },
+    { label: "is", expr: "$this is Patient" },
+    { label: "as", expr: "($this as Patient).name" },
+  ],
+  [t.sampleCategories.subsetting]: [
+    { label: "single()", expr: "name.where(use = 'official').single()" },
+    { label: "first()", expr: "name.first()" },
+    { label: "last()", expr: "name.last()" },
+    { label: "tail()", expr: "name.given.tail()" },
+    { label: "skip(n)", expr: "name.given.skip(1)" },
+    { label: "take(n)", expr: "name.given.take(2)" },
+    { label: "intersect()", expr: "name.given.intersect('John' | 'Jane')" },
+    { label: "exclude()", expr: "name.given.exclude('James')" },
+  ],
+  [t.sampleCategories.combining]: [
+    { label: "union (|)", expr: "name.given | name.family" },
+    { label: "combine()", expr: "name.given.combine(name.family)" },
+    { label: "distinct()", expr: "('a' | 'b' | 'a').distinct()" },
+    { label: "isDistinct()", expr: "name.given.isDistinct()" },
+  ],
+  [t.sampleCategories.strings]: [
+    { label: "length()", expr: "name.family.length()" },
+    { label: "upper()", expr: "name.family.upper()" },
+    { label: "lower()", expr: "name.family.lower()" },
+    { label: "startsWith()", expr: "name.family.startsWith('D')" },
+    { label: "endsWith()", expr: "name.family.endsWith('oe')" },
+    { label: "contains()", expr: "name.family.contains('o')" },
+    { label: "substring()", expr: "name.family.substring(0, 2)" },
+    { label: "indexOf()", expr: "name.family.indexOf('o')" },
+    { label: "replace()", expr: "name.family.replace('Doe', 'Smith')" },
+    { label: "matches()", expr: "name.family.matches('[A-Z].*')" },
+    { label: "split()", expr: "'a,b,c'.split(',')" },
+    { label: "trim()", expr: "'  hello  '.trim()" },
+    { label: "toChars()", expr: "'abc'.toChars()" },
+  ],
+  [t.sampleCategories.math]: [
+    { label: "abs()", expr: "(-5).abs()" },
+    { label: "ceiling()", expr: "(3.2).ceiling()" },
+    { label: "floor()", expr: "(3.8).floor()" },
+    { label: "round()", expr: "(3.567).round(2)" },
+    { label: "sqrt()", expr: "(16).sqrt()" },
+    { label: "power()", expr: "(2).power(10)" },
+    { label: "ln()", expr: "(10).ln()" },
+    { label: "log()", expr: "(100).log(10)" },
+    { label: "exp()", expr: "(1).exp()" },
+    { label: "truncate()", expr: "(3.9).truncate()" },
+  ],
+  [t.sampleCategories.aggregate]: [
+    { label: "count()", expr: "name.count()" },
+    { label: "sum()", expr: "(1 | 2 | 3 | 4 | 5).sum()" },
+    { label: "min()", expr: "(5 | 2 | 8 | 1).min()" },
+    { label: "max()", expr: "(5 | 2 | 8 | 1).max()" },
+    { label: "avg()", expr: "(10 | 20 | 30).avg()" },
+    { label: "aggregate() sum", expr: "(1 | 2 | 3).aggregate($total + $this, 0)" },
+    { label: "aggregate() product", expr: "(1 | 2 | 3 | 4).aggregate($total * $this, 1)" },
+    { label: "aggregate() concat", expr: "('a' | 'b' | 'c').aggregate($total & $this, '')" },
+  ],
+  [t.sampleCategories.conversion]: [
+    { label: "toString()", expr: "(123).toString()" },
+    { label: "toInteger()", expr: "'42'.toInteger()" },
+    { label: "toDecimal()", expr: "'3.14'.toDecimal()" },
+    { label: "toBoolean()", expr: "'true'.toBoolean()" },
+    { label: "convertsToInteger()", expr: "'abc'.convertsToInteger()" },
+    { label: "convertsToDecimal()", expr: "'3.14'.convertsToDecimal()" },
+    { label: "iif()", expr: "iif(active, 'Yes', 'No')" },
+  ],
+  [t.sampleCategories.navigation]: [
+    { label: "children()", expr: "children()" },
+    { label: "descendants()", expr: "descendants().take(5)" },
+  ],
+  [t.sampleCategories.fhirSpecific]: [
+    { label: "extension(url)", expr: "extension('http://example.org/ext')" },
+    { label: "hasExtension()", expr: "hasExtension('http://example.org/ext')" },
+    { label: "resourceType", expr: "resourceType" },
+    { label: "id", expr: "id" },
+    { label: "meta.versionId", expr: "meta.versionId" },
+    { label: "meta.lastUpdated", expr: "meta.lastUpdated" },
+  ],
+  [t.sampleCategories.boolean]: [
+    { label: "not()", expr: "active.not()" },
+    { label: "and", expr: "active and name.exists()" },
+    { label: "or", expr: "active or deceased" },
+    { label: "xor", expr: "true xor false" },
+    { label: "implies", expr: "active implies name.exists()" },
+    { label: "= (equals)", expr: "gender = 'male'" },
+    { label: "!= (not equals)", expr: "gender != 'female'" },
+    { label: "~ (equivalent)", expr: "name.family ~ 'DOE'" },
+    { label: "< > <= >=", expr: "name.count() > 0" },
+  ],
+});
 
 export default function PlaygroundIsland({
   initialExpression = "name.given",
@@ -74,12 +188,17 @@ export default function PlaygroundIsland({
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [executionTime, setExecutionTime] = useState(0);
   const [usedJit, setUsedJit] = useState(false);
+  const [fhirpathJsTime, setFhirpathJsTime] = useState<number | null>(null);
+  const [fhirpathJsError, setFhirpathJsError] = useState<string | null>(null);
+  const [speedup, setSpeedup] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"result" | "ast" | "hints">("result");
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [favorites, setFavorites] = useState<FavoriteEntry[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
+  const [showExpressionBrowser, setShowExpressionBrowser] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [lang, setLang] = useState<Language>(DEFAULT_LANGUAGE);
@@ -200,13 +319,16 @@ export default function PlaygroundIsland({
       // Use server-side evaluation time (pure FHIRPath execution)
       setExecutionTime(data._meta?.evaluationMs ?? (performance.now() - startTime));
       setUsedJit(data._meta?.usedJit ?? false);
+      setFhirpathJsTime(data._meta?.fhirpathJsMs ?? null);
+      setFhirpathJsError(data._meta?.fhirpathJsError ?? null);
+      setSpeedup(data._meta?.speedup ?? null);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       setResult(null);
     } finally {
       setLoading(false);
     }
-  }, [expression, resourceJson, addToHistory]);
+  }, [expression, resourceJson, fhirVersion, addToHistory]);
 
   // Auto-evaluate on expression/resource change (debounced)
   useEffect(() => {
@@ -361,13 +483,71 @@ export default function PlaygroundIsland({
                 <button
                   key={s.expression}
                   onClick={() => setExpression(s.expression)}
-                  class="px-2 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded hover:bg-[rgba(30,210,255,0.15)] dark:hover:bg-[rgba(0,215,215,0.2)] hover:text-atollee-ocean dark:hover:text-atollee-sea transition-colors whitespace-nowrap"
+                  class="px-2 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors whitespace-nowrap"
                   title={s.expression}
                 >
                   {s.label}
                 </button>
               ))}
+              {/* Browse All Expressions Button */}
+              <button
+                onClick={() => { setShowExpressionBrowser(!showExpressionBrowser); setShowHistory(false); setShowFavorites(false); }}
+                class="px-2 py-0.5 text-xs bg-atollee-ocean/10 dark:bg-atollee-sea/20 text-atollee-ocean dark:text-atollee-sea rounded hover:bg-atollee-ocean/20 dark:hover:bg-atollee-sea/30 transition-colors whitespace-nowrap font-medium"
+              >
+                📚 {lang === "de" ? "Alle Funktionen" : "All Functions"} {showExpressionBrowser ? "▲" : "▼"}
+              </button>
             </div>
+            {/* Expression Browser Panel - appears below sample buttons */}
+            {showExpressionBrowser && (
+              <div class="mt-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                {/* Category Tabs */}
+                <div class="flex flex-wrap gap-1 p-2 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                  {Object.keys(getCategorizedExpressions(t)).map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      class={`px-2 py-1 text-xs rounded transition-colors ${
+                        selectedCategory === category
+                          ? "bg-blue-600 text-white font-semibold shadow-sm"
+                          : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"
+                      }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+                {/* Expression List */}
+                <div class="max-h-40 overflow-y-auto p-2">
+                  {selectedCategory ? (
+                    <div class="grid grid-cols-2 gap-1">
+                      {getCategorizedExpressions(t)[selectedCategory]?.map((item) => {
+                        const isActive = expression === item.expr;
+                        return (
+                          <button
+                            key={item.expr}
+                            onClick={() => setExpression(item.expr)}
+                            class={`text-left px-2 py-1.5 text-xs rounded transition-colors group ${
+                              isActive
+                                ? "bg-blue-600 shadow-sm"
+                                : "hover:bg-slate-200 dark:hover:bg-slate-600"
+                            }`}
+                          >
+                            <span class={`font-semibold ${isActive ? "text-white" : "text-slate-800 dark:text-slate-100"}`}>{item.label}</span>
+                            <code class={`block text-[10px] font-mono truncate ${isActive ? "text-blue-100" : "text-slate-500 dark:text-slate-400"}`}>
+                              {item.expr}
+                            </code>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div class="text-center text-xs text-slate-400 dark:text-slate-500 py-2">
+                      {lang === "de" ? "↑ Kategorie auswählen" : "↑ Select a category"}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Result Panel */}
@@ -495,17 +675,40 @@ export default function PlaygroundIsland({
       {/* Metrics Bar - compact, responsive */}
       <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
         <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-          <span class="text-slate-500 dark:text-slate-400">
+          {/* atollee time */}
+          <span class="text-slate-500 dark:text-slate-400" title="fhirpath-atollee">
             ⏱️ {(executionTime * 1000).toFixed(0)}µs
           </span>
+          {/* fhirpath.js comparison */}
+          {fhirpathJsTime !== null ? (
+            <span class="text-slate-400 dark:text-slate-500" title="fhirpath.js (npm)">
+              vs <span class="font-mono">{(fhirpathJsTime * 1000).toFixed(0)}µs</span>
+              <span class="text-slate-300 dark:text-slate-600 ml-1">fhirpath.js</span>
+            </span>
+          ) : fhirpathJsError ? (
+            <span class="text-slate-400 dark:text-slate-500" title={`fhirpath.js: ${fhirpathJsError}`}>
+              <span class="text-amber-500 dark:text-amber-400">⚠</span>
+              <span class="text-slate-300 dark:text-slate-600 ml-1">fhirpath.js {lang === "de" ? "nicht unterstützt" : "unsupported"}</span>
+            </span>
+          ) : null}
+          {/* Speedup badge */}
+          {speedup !== null && speedup > 1 && (
+            <span class="px-1.5 py-0.5 rounded text-xs font-semibold bg-green-600 dark:bg-green-700 text-white" title="Speedup vs fhirpath.js">
+              {speedup.toFixed(1)}x {lang === "de" ? "schneller" : "faster"}
+            </span>
+          )}
           {analysis && (
             <>
               <span class="text-slate-500 dark:text-slate-400 hidden sm:inline">
                 📊 {t.playground.complexity}: {analysis.complexity}/100
               </span>
-              {usedJit && (
+              {usedJit ? (
                 <span class="px-2 py-0.5 rounded text-xs font-medium badge-jit">
                   ⚡ {t.playground.jit}
+                </span>
+              ) : (
+                <span class="px-2 py-0.5 rounded text-xs font-medium badge-interpreter">
+                  🔧 {t.playground.interpreter}
                 </span>
               )}
             </>

@@ -518,7 +518,7 @@ Compiles FHIRPath AST to native JavaScript for maximum performance.
 ```typescript
 import fhirpath from "@atollee/fhirpath-atollee";
 
-// Compile to JIT function (50-75x faster than fhirpath.js)
+// Compile to JIT function (up to 25x faster than fhirpath.js)
 const getNames = fhirpath.compileJIT<string[]>("name.given");
 
 // Execute with native JS performance
@@ -1145,8 +1145,8 @@ deno test -A --coverage packages/fhirpath-atollee/tests/
 ### Completed (v0.7.0) - Januar 2026
 - [x] JIT Compiler for Maximum Performance
   - Compiles FHIRPath AST to native JavaScript
-  - **50-75x faster** than fhirpath.js 4.8.3
-  - **5-20x faster** than interpreted atollee
+  - **Up to 25x faster** than fhirpath.js (12x average)
+  - **2x faster** than interpreted atollee
   - Cached compilation for repeated use
 - [x] Monaco Editor Extension
   - Syntax highlighting with Monarch tokenizer
