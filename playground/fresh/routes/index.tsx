@@ -72,7 +72,7 @@ export default define.page(function PlaygroundPage({ url }) {
           Interactive FHIRPath expression tester with live evaluation, AST visualization, 
           optimization hints, and JIT compiler support. Powered by{" "}
           <a 
-            href="https://gitlab.atollee.com/fhir/fhirpath-atollee" 
+            href="https://github.com/atollee/fhirpath-atollee" 
             class="text-blue-600 dark:text-blue-400 hover:underline"
           >
             fhirpath-atollee

@@ -29,7 +29,7 @@ export default define.page(function App({ Component, url }) {
             <div class="flex justify-between h-14">
               <div class="flex items-center space-x-4">
                 <a href="/" class="flex items-center space-x-2">
-                  <span class="text-2xl">🔬</span>
+                  <img src="/healthruntime-logo.png" alt="HealthRuntime" class="h-8 w-auto" />
                   <span class="font-bold text-lg text-gray-900 dark:text-white">
                     FHIRPath Playground
                   </span>
@@ -40,12 +40,12 @@ export default define.page(function App({ Component, url }) {
               </div>
               <div class="flex items-center space-x-4">
                 <a
-                  href="https://gitlab.atollee.com/fhir/fhirpath-atollee"
+                  href="https://github.com/atollee/fhirpath-atollee"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                 >
-                  GitLab
+                  GitHub
                 </a>
                 <a
                   href="https://hl7.org/fhirpath/"
