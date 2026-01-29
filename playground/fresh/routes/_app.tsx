@@ -61,7 +61,7 @@ export default define.page(function App({ Component, url }) {
                   </span>
                 </a>
                 <span class="badge-version px-2 py-0.5 text-xs font-medium rounded hidden sm:inline">
-                  v0.7.1
+                  v0.7.2
                 </span>
               </div>
               
