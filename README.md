@@ -720,6 +720,9 @@ PLAYGROUND_PORT=8080 deno task dev
 - Expression history (localStorage)
 - Favorites management
 - One-click URL sharing
+- FHIR Release selector (R4/R4B/R5/R6) for type-aware evaluation
+- Dark/Light mode with system preference detection
+- English/German language support
 
 ---
 
@@ -1192,6 +1195,24 @@ deno test -A --coverage packages/fhirpath-atollee/tests/
   - Intelligent autocomplete for functions
   - Dark/Light theme support
   - Ctrl+Enter to evaluate
+
+### Completed (v0.7.4)
+- [x] Internationalization (i18n)
+  - English/German language support
+  - Language switcher in navigation
+  - localStorage persistence
+- [x] UI/UX Improvements
+  - Dark/Light mode toggle
+  - Auto-resize Monaco Editor (grows with content)
+  - Consistent focus ring styling
+  - Mobile-responsive layout
+
+### Completed (v0.7.5)
+- [x] FHIR Release Selector
+  - Dropdown for R4/R4B/R5/R6 selection
+  - Type-aware evaluation with selected model
+  - Cached FhirPathEngine instances per version
+  - Affects `is`, `as`, `ofType` type checking
 
 ---
 
