@@ -271,7 +271,7 @@ export default function PlaygroundIsland({
           <textarea
             value={resourceJson}
             onInput={(e) => setResourceJson((e.target as HTMLTextAreaElement).value)}
-            class="w-full flex-1 min-h-[160px] p-2 font-mono text-xs border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-[rgb(30,210,255)] focus:border-transparent resize-none"
+            class="w-full flex-1 min-h-[160px] p-2 font-mono text-xs border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[rgb(30,210,255)] focus:border-transparent resize-none"
             spellcheck={false}
           />
         </div>

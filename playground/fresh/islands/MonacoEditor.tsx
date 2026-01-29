@@ -333,7 +333,7 @@ export default function MonacoEditor({
       )}
       <div
         ref={containerRef}
-        class="w-full rounded-md border border-slate-300 dark:border-slate-600 overflow-hidden transition-[height] duration-100 focus-within:ring-1 focus-within:ring-[rgb(30,210,255)] focus-within:border-transparent"
+        class="w-full rounded-md border border-slate-300 dark:border-slate-600 overflow-hidden transition-[height] duration-100 focus-within:outline-none focus-within:ring-1 focus-within:ring-[rgb(30,210,255)] focus-within:border-transparent"
         style={{ height: `${editorHeight}px`, minHeight: `${minHeight}px`, maxHeight: `${maxHeight}px` }}
       />
     </div>
