@@ -76,14 +76,14 @@ The standard `fhirpath.js` library (HL7/fhirpath.js) is the reference implementa
 
 | Scenario | fhirpath.js 4.8.3 | atollee (interpreted) | atollee (JIT) | JIT Speedup |
 |----------|-------------------|----------------------|---------------|-------------|
-| Simple path (`name.given`) | 6.5 µs | 1.5 µs | 130 ns | **50x** |
-| Where clause | 15.8 µs | 1.6 µs | 301 ns | **53x** |
-| Chained methods | 9.5 µs | 1.3 µs | 120 ns | **79x** |
-| Complex expression | 31.5 µs | 2.2 µs | 791 ns | **40x** |
-| Batch 100 patients | 472 µs | 131 µs | 7.3 µs | **64x** |
-| Batch 1000 patients | 4.55 ms | 1.30 ms | 52.9 µs | **86x** |
+| Simple path (`name.given`) | ~6.5 µs | ~1.4 µs | ~140 ns | **~50x** |
+| Where clause | ~16 µs | ~1.4 µs | ~300 ns | **~50x** |
+| Chained methods | ~9.5 µs | ~1.2 µs | ~130 ns | **~75x** |
+| Complex expression | ~35 µs | ~2.0 µs | ~750 ns | **~45x** |
+| Batch 100 patients | ~440 µs | ~115 µs | ~7 µs | **~60x** |
+| Batch 1000 patients | ~4.3 ms | ~1.15 ms | ~60 µs | **~70x** |
 
-*Benchmarks on Apple M3, Deno 2.x, single-threaded. JIT compilation provides 11-25x speedup over interpreted atollee.*
+*Benchmarks on Apple M3, Deno 2.x, single-threaded. Values vary ±20% between runs due to CPU throttling and system load. Run `deno task bench` for current measurements.*
 
 ---
 
@@ -518,7 +518,7 @@ Compiles FHIRPath AST to native JavaScript for maximum performance.
 ```typescript
 import fhirpath from "@atollee/fhirpath-atollee";
 
-// Compile to JIT function (55-86x faster than fhirpath.js)
+// Compile to JIT function (50-75x faster than fhirpath.js)
 const getNames = fhirpath.compileJIT<string[]>("name.given");
 
 // Execute with native JS performance
@@ -1137,8 +1137,8 @@ deno test -A --coverage packages/fhirpath-atollee/tests/
 ### Completed (v0.7.0) - Januar 2026
 - [x] JIT Compiler for Maximum Performance
   - Compiles FHIRPath AST to native JavaScript
-  - **55-86x faster** than fhirpath.js 4.8.3
-  - **11-25x faster** than interpreted atollee
+  - **50-75x faster** than fhirpath.js 4.8.3
+  - **5-20x faster** than interpreted atollee
   - Cached compilation for repeated use
 - [x] Monaco Editor Extension
   - Syntax highlighting with Monarch tokenizer
