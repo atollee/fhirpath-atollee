@@ -2,7 +2,7 @@
 
 A modern, high-performance FHIRPath implementation in TypeScript - designed as a drop-in replacement for `fhirpath.js` with significant performance improvements.
 
-**Version:** 0.7.4  
+**Version:** 0.7.5  
 **Tests:** 580+ test cases (including official HL7 FHIRPath test suite)  
 **License:** MIT
 
