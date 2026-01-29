@@ -46,6 +46,23 @@
   --border-color: rgb(55, 55, 60);
 }
 
+/* Light mode explicit text colors */
+html:not(.dark) .text-slate-900 {
+  color: #0f172a !important;
+}
+
+html:not(.dark) .text-slate-600 {
+  color: #475569 !important;
+}
+
+html:not(.dark) .text-slate-500 {
+  color: #64748b !important;
+}
+
+html:not(.dark) .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
 /* Dark mode overrides for better contrast */
 .dark body {
   background-color: var(--bg-secondary);
