@@ -233,157 +233,155 @@ export default function PlaygroundIsland({
   const isFavorited = favorites.some(f => f.expression === expression);
 
   return (
-    <div class="space-y-4">
-      {/* Expression Input */}
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-        <div class="flex items-center justify-between mb-2">
-          <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase">
-            Expression
-          </h3>
-          <div class="flex items-center space-x-2">
-            <button
-              onClick={toggleFavorite}
-              class={`px-2 py-1 text-lg ${isFavorited ? "text-yellow-500" : "text-gray-400"} hover:text-yellow-500`}
-              title={isFavorited ? "Remove from favorites" : "Add to favorites"}
-            >
-              {isFavorited ? "★" : "☆"}
-            </button>
-            <button
-              onClick={copyShareableURL}
-              class={`px-3 py-1.5 text-sm rounded ${
-                copied
-                  ? "bg-green-600 text-white"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
-              }`}
-            >
-              {copied ? "✓ Copied!" : "🔗 Share"}
-            </button>
+    <div class="space-y-3">
+      {/* Top Row: Expression + Actions */}
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
+        <div class="flex items-center gap-3">
+          <div class="flex-1">
+            <input
+              type="text"
+              value={expression}
+              onInput={(e) => setExpression((e.target as HTMLInputElement).value)}
+              class="w-full px-3 py-2 font-mono text-sm border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter FHIRPath expression..."
+            />
           </div>
+          <button
+            onClick={toggleFavorite}
+            class={`px-2 py-2 text-lg ${isFavorited ? "text-yellow-500" : "text-gray-400"} hover:text-yellow-500`}
+            title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+          >
+            {isFavorited ? "★" : "☆"}
+          </button>
+          <button
+            onClick={copyShareableURL}
+            class={`px-3 py-2 text-sm rounded whitespace-nowrap ${
+              copied
+                ? "bg-green-600 text-white"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+          >
+            {copied ? "✓ Copied!" : "🔗 Share"}
+          </button>
         </div>
         
-        <textarea
-          value={expression}
-          onInput={(e) => setExpression((e.target as HTMLTextAreaElement).value)}
-          class="w-full h-20 p-3 font-mono text-sm border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
-          placeholder="Enter FHIRPath expression..."
-        />
-
-        {/* Sample Expressions */}
-        <div class="flex flex-wrap gap-2 mt-2">
+        {/* Sample Expressions - inline */}
+        <div class="flex flex-wrap gap-1.5 mt-2">
           {SAMPLE_EXPRESSIONS.map((s) => (
             <button
               key={s.expression}
               onClick={() => setExpression(s.expression)}
-              class="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+              class="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
               title={s.expression}
             >
               {s.label}
             </button>
           ))}
         </div>
-
-        {/* History & Favorites */}
-        <div class="mt-4 space-y-2">
-          <div>
-            <button
-              onClick={() => setShowHistory(!showHistory)}
-              class="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-            >
-              📜 Recent Expressions {showHistory ? "▼" : "▶"}
-            </button>
-            {showHistory && history.length > 0 && (
-              <div class="mt-2 max-h-32 overflow-y-auto space-y-1">
-                {history.slice(0, 10).map((h) => (
-                  <div
-                    key={h.timestamp}
-                    onClick={() => setExpression(h.expression)}
-                    class="flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-700 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-                  >
-                    <span class="text-xs font-mono text-blue-600 dark:text-blue-400 truncate max-w-[70%]">
-                      {h.expression}
-                    </span>
-                    <span class="text-xs text-gray-400">{formatTimeAgo(h.timestamp)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div>
-            <button
-              onClick={() => setShowFavorites(!showFavorites)}
-              class="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-            >
-              ⭐ Favorites {showFavorites ? "▼" : "▶"}
-            </button>
-            {showFavorites && favorites.length > 0 && (
-              <div class="mt-2 max-h-32 overflow-y-auto space-y-1">
-                {favorites.map((f) => (
-                  <div
-                    key={f.id}
-                    class="flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-700 rounded"
-                  >
-                    <span
-                      onClick={() => setExpression(f.expression)}
-                      class="text-xs font-mono text-blue-600 dark:text-blue-400 truncate max-w-[70%] cursor-pointer hover:underline"
-                    >
-                      {f.label}
-                    </span>
-                    <button
-                      onClick={() => {
-                        setFavorites(prev => {
-                          const newFavs = prev.filter(x => x.id !== f.id);
-                          saveFavorites(newFavs);
-                          return newFavs;
-                        });
-                      }}
-                      class="text-xs text-gray-400 hover:text-red-500"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
       </div>
 
-      {/* Two Column Layout */}
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Main Grid: Resource | Result */}
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {/* Resource Input */}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase mb-2">
-            Resource (JSON)
-          </h3>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+              Resource (JSON)
+            </h3>
+            {/* History dropdown */}
+            <div class="relative">
+              <button
+                onClick={() => setShowHistory(!showHistory)}
+                class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              >
+                📜 History {showHistory ? "▲" : "▼"}
+              </button>
+              {showHistory && history.length > 0 && (
+                <div class="absolute right-0 top-6 z-10 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  {history.slice(0, 10).map((h) => (
+                    <div
+                      key={h.timestamp}
+                      onClick={() => { setExpression(h.expression); setShowHistory(false); }}
+                      class="flex justify-between items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0"
+                    >
+                      <span class="text-xs font-mono text-blue-600 dark:text-blue-400 truncate">
+                        {h.expression}
+                      </span>
+                      <span class="text-xs text-gray-400 ml-2">{formatTimeAgo(h.timestamp)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
           <textarea
             value={resourceJson}
             onInput={(e) => setResourceJson((e.target as HTMLTextAreaElement).value)}
-            class="w-full h-64 p-3 font-mono text-xs border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+            class="w-full h-72 p-2 font-mono text-xs border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         {/* Result Panel */}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          {/* Tabs */}
-          <div class="flex border-b border-gray-200 dark:border-gray-700 mb-3">
-            {(["result", "ast", "hints"] as const).map((tab) => (
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
+          {/* Tabs + Favorites */}
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex border-b border-gray-200 dark:border-gray-700">
+              {(["result", "ast", "hints"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  class={`px-3 py-1.5 text-xs font-medium ${
+                    activeTab === tab
+                      ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
+                      : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                  }`}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
+            </div>
+            {/* Favorites dropdown */}
+            <div class="relative">
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                class={`px-4 py-2 text-sm font-medium ${
-                  activeTab === tab
-                    ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                }`}
+                onClick={() => setShowFavorites(!showFavorites)}
+                class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
               >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                ⭐ Favorites {showFavorites ? "▲" : "▼"}
               </button>
-            ))}
+              {showFavorites && favorites.length > 0 && (
+                <div class="absolute right-0 top-6 z-10 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  {favorites.map((f) => (
+                    <div
+                      key={f.id}
+                      class="flex justify-between items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                    >
+                      <span
+                        onClick={() => { setExpression(f.expression); setShowFavorites(false); }}
+                        class="text-xs font-mono text-blue-600 dark:text-blue-400 truncate cursor-pointer hover:underline"
+                      >
+                        {f.label}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setFavorites(prev => {
+                            const newFavs = prev.filter(x => x.id !== f.id);
+                            saveFavorites(newFavs);
+                            return newFavs;
+                          });
+                        }}
+                        class="text-xs text-gray-400 hover:text-red-500 ml-2"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Tab Content */}
-          <div class="h-56 overflow-auto">
+          <div class="h-64 overflow-auto bg-gray-50 dark:bg-gray-900 rounded p-2">
             {activeTab === "result" && (
               <div>
                 {error ? (
@@ -444,9 +442,9 @@ export default function PlaygroundIsland({
         </div>
       </div>
 
-      {/* Metrics Bar */}
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3 flex items-center justify-between text-sm">
-        <div class="flex items-center space-x-4">
+      {/* Metrics Bar - compact */}
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow px-3 py-2 flex items-center justify-between text-xs">
+        <div class="flex items-center space-x-3">
           <span class="text-gray-500 dark:text-gray-400">
             ⏱️ {executionTime.toFixed(2)}ms
           </span>
