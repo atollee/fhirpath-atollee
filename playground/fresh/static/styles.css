@@ -38,12 +38,58 @@
 
 .dark {
   --bg-primary: var(--atollee-black);
-  --bg-secondary: rgb(15, 15, 15);
-  --bg-tertiary: var(--atollee-darkgray);
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: var(--atollee-gray);
-  --border-color: var(--atollee-darkgray);
+  --bg-secondary: rgb(18, 18, 20);
+  --bg-tertiary: rgb(35, 35, 40);
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
+  --border-color: rgb(55, 55, 60);
+}
+
+/* Dark mode overrides for better contrast */
+.dark body {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.dark .bg-white {
+  background-color: rgb(25, 25, 28) !important;
+}
+
+.dark .bg-slate-800 {
+  background-color: rgb(25, 25, 28) !important;
+}
+
+.dark .bg-slate-50,
+.dark .bg-slate-100 {
+  background-color: rgb(35, 35, 40) !important;
+}
+
+.dark .bg-slate-900 {
+  background-color: rgb(15, 15, 18) !important;
+}
+
+.dark .text-slate-900 {
+  color: #ffffff !important;
+}
+
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+.dark .text-slate-400 {
+  color: #cbd5e1 !important;
+}
+
+.dark .border-slate-200,
+.dark .border-slate-300 {
+  border-color: rgb(55, 55, 60) !important;
+}
+
+.dark .border-slate-600,
+.dark .border-slate-700 {
+  border-color: rgb(65, 65, 70) !important;
 }
 
 /* Apply theme colors */
