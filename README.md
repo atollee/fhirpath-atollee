@@ -588,9 +588,11 @@ console.log(formatHints(result.hints));
 // - Multiple where() clauses (suggest combining)
 ```
 
-### FHIRPath Playground (v0.7.0)
+### FHIRPath Playground (v0.7.2)
 
-Interactive Web Component for testing FHIRPath expressions.
+Interactive playground for testing FHIRPath expressions with **two deployment options**:
+
+#### Option 1: Web Component (Client-side)
 
 ```html
 <script type="module">
@@ -620,13 +622,33 @@ Interactive Web Component for testing FHIRPath expressions.
 </script>
 ```
 
-Features:
+#### Option 2: Server-Side Rendered (Deno Fresh 2.2.0)
+
+```bash
+# Start the SSR playground
+cd packages/fhirpath-atollee/playground/fresh
+deno task dev
+
+# Open http://localhost:8080
+```
+
+**SSR Features:**
+- Server-rendered initial content (SEO-friendly)
+- Island architecture with Preact for interactivity
+- Tailwind CSS (no Vite, pure Fresh)
+- Social sharing with Open Graph meta tags
+- Shareable URLs: `?expr=name.given&resource={...}`
+
+**Common Features (both versions):**
 - Live expression evaluation
 - AST visualization (toggle view)
 - Optimization hints display
 - Performance metrics (execution time, complexity)
 - JIT compatibility indicator
 - Sample expressions for quick testing
+- Expression history (localStorage)
+- Favorites management
+- One-click URL sharing
 
 ---
 
@@ -1084,10 +1106,17 @@ deno test -A --coverage packages/fhirpath-atollee/tests/
   - Load expression from URL parameters
   - Share expression + resource together
 
+### Completed (v0.7.2)
+- [x] Server-side Rendering with Deno Fresh 2.2.0
+  - SSR for SEO and instant display
+  - Island architecture for interactivity
+  - Tailwind CSS (no Vite)
+  - Meta tags for social sharing
+
 ### Future
-- [ ] Server-side rendering for Playground
 - [ ] Export/import favorites as JSON
 - [ ] Expression categories/tags
+- [ ] Monaco Editor integration in Playground
 
 ---
 

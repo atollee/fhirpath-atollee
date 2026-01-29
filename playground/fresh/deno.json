@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "dom.asynciterable", "dom.iterable", "deno.ns"],
+    "jsx": "precompile",
+    "jsxImportSource": "preact",
+    "jsxPrecompileSkipElements": [
+      "a", "img", "source", "body", "html", "head",
+      "title", "meta", "script", "link", "style", "base", "noscript", "template"
+    ]
+  },
+  "exclude": ["**/_fresh/*"],
+  "imports": {
+    "fresh": "jsr:@fresh/core@^2.2.0",
+    "fresh/runtime": "jsr:@fresh/core@^2.2.0/runtime",
+    "fresh/dev": "jsr:@fresh/core@^2.2.0/dev",
+    "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@1.0.0",
+    "preact": "npm:preact@^10.28.2",
+    "preact/hooks": "npm:preact@^10.28.2/hooks",
+    "@preact/signals": "npm:@preact/signals@^2.6.1",
+    "tailwindcss": "npm:tailwindcss@^4.1.18"
+  },
+  "tasks": {
+    "dev": "deno run -A --watch=static/,routes/,islands/ dev.ts",
+    "build": "deno run -A dev.ts build",
+    "start": "deno run -A main.ts"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["fresh", "recommended"]
+    }
+  }
+}
