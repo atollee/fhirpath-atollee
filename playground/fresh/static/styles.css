@@ -367,6 +367,17 @@ a.link-atollee:hover,
   background-color: rgba(16, 185, 129, 0.2);
 }
 
+/* Interpreter badge */
+.badge-interpreter {
+  background-color: rgba(100, 116, 139, 0.15);
+  color: #64748b;
+}
+
+.dark .badge-interpreter {
+  background-color: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+}
+
 /* Warning badge */
 .badge-warning {
   background-color: rgba(250, 120, 0, 0.15);

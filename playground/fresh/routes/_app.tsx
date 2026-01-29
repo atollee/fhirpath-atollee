@@ -29,7 +29,7 @@ export default define.page(function App({ Component, url }) {
         
         {/* Open Graph for Social Sharing */}
         <meta property="og:title" content="FHIRPath Playground - atollee" />
-        <meta property="og:description" content="Test FHIRPath expressions interactively with live evaluation and optimization hints. 50-75x faster than fhirpath.js." />
+        <meta property="og:description" content="Test FHIRPath expressions interactively with live evaluation and optimization hints. JIT compiler delivers up to 25x faster execution than fhirpath.js." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={url.href} />
         <meta property="og:image" content="/healthruntime-logo.png" />

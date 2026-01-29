@@ -57,11 +57,12 @@ export interface Translations {
     noHints: string;
     complexity: string;
     jit: string;
+    interpreter: string;
     noJit: string;
     fhirRelease: string;
     fhirReleaseTooltip: string;
   };
-  // Sample expressions
+  // Sample expressions (legacy - keep for backwards compatibility)
   samples: {
     givenNames: string;
     officialName: string;
@@ -70,6 +71,21 @@ export interface Translations {
     hasPhone: string;
     identifiers: string;
     typeCheck: string;
+  };
+  // Categorized sample expressions
+  sampleCategories: {
+    basic: string;
+    existence: string;
+    filtering: string;
+    subsetting: string;
+    combining: string;
+    strings: string;
+    math: string;
+    aggregate: string;
+    conversion: string;
+    navigation: string;
+    fhirSpecific: string;
+    boolean: string;
   };
   // Footer
   footer: string;
@@ -85,14 +101,14 @@ export const translations: Record<Language, Translations> = {
     },
     headings: {
       title: "FHIRPath Playground",
-      subtitle: "Interactive FHIRPath expression tester with live evaluation, AST visualization, optimization hints, and JIT compiler support. Powered by fhirpath-atollee — up to 75x faster than fhirpath.js.",
+      subtitle: "Interactive FHIRPath expression tester with live evaluation, AST visualization, optimization hints, and JIT compiler support. Powered by fhirpath-atollee — up to 25x faster than fhirpath.js with JIT.",
       resource: "Resource (JSON)",
       expression: "Expression",
     },
     features: {
       performance: {
         title: "High Performance",
-        description: "JIT compiler delivers 50-75x faster execution than fhirpath.js. Native TypeScript parser with zero external dependencies.",
+        description: "JIT compiler delivers up to 25x faster execution than fhirpath.js (12x average). Native TypeScript parser with AST caching.",
       },
       optimization: {
         title: "Smart Optimization",
@@ -120,6 +136,7 @@ export const translations: Record<Language, Translations> = {
       noHints: "No optimization suggestions",
       complexity: "Complexity",
       jit: "JIT",
+      interpreter: "Interpreter",
       noJit: "No JIT",
       fhirRelease: "FHIR",
       fhirReleaseTooltip: "FHIR version for type checking (is/as/ofType)",
@@ -133,6 +150,20 @@ export const translations: Record<Language, Translations> = {
       identifiers: "Identifiers",
       typeCheck: "Type check",
     },
+    sampleCategories: {
+      basic: "Basic",
+      existence: "Existence",
+      filtering: "Filtering",
+      subsetting: "Subsetting",
+      combining: "Combining",
+      strings: "Strings",
+      math: "Math",
+      aggregate: "Aggregate",
+      conversion: "Conversion",
+      navigation: "Navigation",
+      fhirSpecific: "FHIR-specific",
+      boolean: "Boolean",
+    },
     footer: "fhirpath-atollee - High-performance FHIRPath for TypeScript",
   },
   de: {
@@ -144,14 +175,14 @@ export const translations: Record<Language, Translations> = {
     },
     headings: {
       title: "FHIRPath Playground",
-      subtitle: "Interaktiver FHIRPath-Ausdruckstester mit Live-Auswertung, AST-Visualisierung, Optimierungshinweisen und JIT-Compiler-Unterstützung. Powered by fhirpath-atollee — bis zu 75x schneller als fhirpath.js.",
+      subtitle: "Interaktiver FHIRPath-Ausdruckstester mit Live-Auswertung, AST-Visualisierung, Optimierungshinweisen und JIT-Compiler-Unterstützung. Powered by fhirpath-atollee — bis zu 25x schneller als fhirpath.js mit JIT.",
       resource: "Ressource (JSON)",
       expression: "Ausdruck",
     },
     features: {
       performance: {
         title: "Hohe Leistung",
-        description: "JIT-Compiler liefert 50-75x schnellere Ausführung als fhirpath.js. Nativer TypeScript-Parser ohne externe Abhängigkeiten.",
+        description: "JIT-Compiler liefert bis zu 25x schnellere Ausführung als fhirpath.js (12x im Durchschnitt). Nativer TypeScript-Parser mit AST-Caching.",
       },
       optimization: {
         title: "Intelligente Optimierung",
@@ -179,6 +210,7 @@ export const translations: Record<Language, Translations> = {
       noHints: "Keine Optimierungsvorschläge",
       complexity: "Komplexität",
       jit: "JIT",
+      interpreter: "Interpreter",
       noJit: "Kein JIT",
       fhirRelease: "FHIR",
       fhirReleaseTooltip: "FHIR-Version für Typprüfung (is/as/ofType)",
@@ -191,6 +223,20 @@ export const translations: Record<Language, Translations> = {
       hasPhone: "Hat Telefon",
       identifiers: "Identifikatoren",
       typeCheck: "Typprüfung",
+    },
+    sampleCategories: {
+      basic: "Basis",
+      existence: "Existenz",
+      filtering: "Filterung",
+      subsetting: "Teilmengen",
+      combining: "Kombinieren",
+      strings: "Zeichenketten",
+      math: "Mathematik",
+      aggregate: "Aggregation",
+      conversion: "Konvertierung",
+      navigation: "Navigation",
+      fhirSpecific: "FHIR-spezifisch",
+      boolean: "Boolesch",
     },
     footer: "fhirpath-atollee - Hochleistungs-FHIRPath für TypeScript",
   },

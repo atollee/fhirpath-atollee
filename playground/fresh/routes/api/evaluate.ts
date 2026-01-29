@@ -3,6 +3,7 @@
  * 
  * Supports FHIR R4/R4B/R5/R6 type checking
  * No mocks, no simulation - real FHIRPath evaluation
+ * Includes comparison with fhirpath.js for performance benchmarking
  * 
  * @see https://hl7.org/fhir/fhirpath.html
  */
@@ -11,6 +12,8 @@ import { parseFhirPath } from "../../../../src/parser/mod.ts";
 import { analyzeExpression } from "../../../../src/optimizer/mod.ts";
 import { compileJIT, type CompiledFhirPath } from "../../../../src/jit/mod.ts";
 import { loggers } from "../../../../src/logging.ts";
+// Import fhirpath.js for comparison
+import fhirpathJs from "npm:fhirpath@3.16.0";
 
 // Import FHIR models
 import r4Model from "../../../../fhir-context/r4/mod.ts";
@@ -47,6 +50,10 @@ const defaultEngine = new FhirPathEngine();
 
 // JIT function cache
 const jitCache = new Map<string, CompiledFhirPath<unknown[]>>();
+
+// fhirpath.js compiled function cache
+// deno-lint-ignore no-explicit-any
+const fhirpathJsCache = new Map<string, (resource: any, context?: any) => any[]>();
 
 export const handler = {
   async POST(req: Request): Promise<Response> {
@@ -93,6 +100,7 @@ export const handler = {
       let error = null;
       let evalDuration = 0;
       let usedJit = false;
+      let fhirpathJsDuration: number | null = null;
 
       try {
         const evalStart = performance.now();
@@ -128,6 +136,26 @@ export const handler = {
         });
       }
 
+      // Benchmark fhirpath.js for comparison (if no error)
+      let fhirpathJsError: string | null = null;
+      if (!error) {
+        try {
+          let compiledFn = fhirpathJsCache.get(expression);
+          if (!compiledFn) {
+            compiledFn = fhirpathJs.compile(expression);
+            fhirpathJsCache.set(expression, compiledFn);
+          }
+          
+          const fhirpathJsStart = performance.now();
+          compiledFn(resource || {}, context || {});
+          fhirpathJsDuration = performance.now() - fhirpathJsStart;
+        } catch (e) {
+          // fhirpath.js evaluation failed - capture error
+          fhirpathJsDuration = null;
+          fhirpathJsError = e instanceof Error ? e.message : String(e);
+        }
+      }
+
       const totalDuration = performance.now() - startTime;
       
       log.perf("Expression evaluated", evalDuration, {
@@ -138,6 +166,11 @@ export const handler = {
           fhirVersion: version || "none",
         },
       });
+
+      // Calculate speedup if fhirpath.js comparison is available
+      const speedup = fhirpathJsDuration && evalDuration > 0 
+        ? fhirpathJsDuration / evalDuration 
+        : null;
 
       return Response.json({
         result,
@@ -150,6 +183,9 @@ export const handler = {
           evaluationMs: evalDuration,
           totalMs: totalDuration,
           usedJit,
+          fhirpathJsMs: fhirpathJsDuration,
+          fhirpathJsError,
+          speedup,
           timestamp: new Date().toISOString(),
           fhirVersion: version || null,
         },
