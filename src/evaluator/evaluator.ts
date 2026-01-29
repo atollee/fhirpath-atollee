@@ -467,6 +467,27 @@ export class FhirPathEvaluator {
           const r = fn.toBoolean(v);
           return r !== undefined ? [r] : [];
         });
+      case "toDate":
+        return this.mapSingle(collection, v => {
+          const r = fn.toDate(v);
+          return r !== undefined ? [r] : [];
+        });
+      case "toDateTime":
+        return this.mapSingle(collection, v => {
+          const r = fn.toDateTime(v);
+          return r !== undefined ? [r] : [];
+        });
+      case "toTime":
+        return this.mapSingle(collection, v => {
+          const r = fn.toTime(v);
+          return r !== undefined ? [r] : [];
+        });
+      case "toQuantity":
+        return this.mapSingle(collection, v => {
+          const unit = args.length > 0 ? this.evalToString(args[0]) : undefined;
+          const r = fn.toQuantity(v, unit);
+          return r !== undefined ? [r] : [];
+        });
 
       // Logic
       case "not":
@@ -644,6 +665,18 @@ export class FhirPathEvaluator {
           v === "true" || v === "false" ||
           v === 1 || v === 0
         )];
+
+      case "convertsToDate":
+        return [collection.every(v => fn.convertsToDate(v))];
+
+      case "convertsToDateTime":
+        return [collection.every(v => fn.convertsToDateTime(v))];
+
+      case "convertsToTime":
+        return [collection.every(v => fn.convertsToTime(v))];
+
+      case "convertsToQuantity":
+        return [collection.every(v => fn.convertsToQuantity(v))];
 
       default:
         throw new EvaluatorError(`Unknown function: ${name}`);

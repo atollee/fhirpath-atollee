@@ -385,6 +385,200 @@ export function toBoolean(value: unknown): boolean | undefined {
   return undefined;
 }
 
+/** 
+ * Converts to FHIR Date (YYYY, YYYY-MM, or YYYY-MM-DD)
+ * Per FHIRPath spec: Input can be Date, DateTime or String
+ */
+export function toDate(value: unknown): string | undefined {
+  if (value === null || value === undefined) return undefined;
+  
+  if (typeof value === "string") {
+    // Already a date string - validate format
+    // FHIR Date: YYYY, YYYY-MM, YYYY-MM-DD
+    const dateRegex = /^(\d{4})(-\d{2})?(-\d{2})?$/;
+    const match = value.match(dateRegex);
+    if (match) {
+      return value;
+    }
+    
+    // Try to parse DateTime string and extract date part
+    const dateTimeRegex = /^(\d{4}(-\d{2}(-\d{2})?)?)([T ].*)?$/;
+    const dtMatch = value.match(dateTimeRegex);
+    if (dtMatch) {
+      return dtMatch[1];
+    }
+    
+    // Try to parse as ISO date
+    const parsed = Date.parse(value);
+    if (!isNaN(parsed)) {
+      return new Date(parsed).toISOString().split("T")[0];
+    }
+    
+    return undefined;
+  }
+  
+  // Date object
+  if (value instanceof Date) {
+    return value.toISOString().split("T")[0];
+  }
+  
+  return undefined;
+}
+
+/**
+ * Converts to FHIR DateTime (ISO 8601)
+ * Per FHIRPath spec: Input can be Date, DateTime or String
+ */
+export function toDateTime(value: unknown): string | undefined {
+  if (value === null || value === undefined) return undefined;
+  
+  if (typeof value === "string") {
+    // FHIR DateTime: YYYY, YYYY-MM, YYYY-MM-DD, YYYY-MM-DDThh:mm:ss+zz:zz
+    const dateTimeRegex = /^(\d{4})(-\d{2})?(-\d{2})?(T\d{2}(:\d{2}(:\d{2}(\.\d+)?)?)?([+-]\d{2}:\d{2}|Z)?)?$/;
+    if (dateTimeRegex.test(value)) {
+      return value;
+    }
+    
+    // Try to parse as ISO date
+    const parsed = Date.parse(value);
+    if (!isNaN(parsed)) {
+      return new Date(parsed).toISOString();
+    }
+    
+    return undefined;
+  }
+  
+  // Date object
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  
+  return undefined;
+}
+
+/**
+ * Converts to FHIR Time (HH:MM:SS or HH:MM:SS.fff)
+ * Per FHIRPath spec: Input must be String or Time
+ */
+export function toTime(value: unknown): string | undefined {
+  if (value === null || value === undefined) return undefined;
+  
+  if (typeof value === "string") {
+    // FHIR Time: hh:mm:ss or hh:mm:ss.fff
+    const timeRegex = /^(\d{2}):(\d{2})(:(\d{2})(\.\d+)?)?$/;
+    const match = value.match(timeRegex);
+    if (match) {
+      const hours = parseInt(match[1], 10);
+      const minutes = parseInt(match[2], 10);
+      const seconds = match[4] ? parseInt(match[4], 10) : 0;
+      
+      if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59 && seconds >= 0 && seconds <= 59) {
+        return value;
+      }
+    }
+    
+    // Try to extract time from DateTime string
+    const dateTimeMatch = value.match(/T(\d{2}:\d{2}(:\d{2}(\.\d+)?)?)/);
+    if (dateTimeMatch) {
+      return dateTimeMatch[1];
+    }
+    
+    return undefined;
+  }
+  
+  // Date object - extract time part
+  if (value instanceof Date) {
+    return value.toISOString().split("T")[1].split("Z")[0];
+  }
+  
+  return undefined;
+}
+
+/**
+ * Converts to Quantity
+ * Per FHIRPath spec: Input can be Integer, Decimal, String, or Quantity
+ * String format: number followed by optional unit (e.g., "10 'kg'", "5.5 'cm'")
+ */
+export function toQuantity(value: unknown, unit?: string): FhirPathQuantity | undefined {
+  if (value === null || value === undefined) return undefined;
+  
+  // Already a Quantity object
+  if (typeof value === "object" && value !== null && "value" in value) {
+    const q = value as { value?: unknown; unit?: unknown; code?: unknown; system?: unknown };
+    if (typeof q.value === "number") {
+      return {
+        value: q.value,
+        unit: unit ?? (typeof q.unit === "string" ? q.unit : typeof q.code === "string" ? q.code : undefined)
+      };
+    }
+  }
+  
+  // Number
+  if (typeof value === "number") {
+    return { value, unit };
+  }
+  
+  // String - parse "number unit" format
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    
+    // Try to parse as plain number
+    const num = parseFloat(trimmed);
+    if (!isNaN(num) && String(num) === trimmed) {
+      return { value: num, unit };
+    }
+    
+    // Parse "number 'unit'" or "number unit" format
+    // FHIRPath uses UCUM units in single quotes: 10 'kg'
+    const quantityRegex = /^([+-]?\d+\.?\d*)\s*(?:'([^']+)'|([a-zA-Z/%]+\S*))?$/;
+    const match = trimmed.match(quantityRegex);
+    if (match) {
+      const parsedValue = parseFloat(match[1]);
+      const parsedUnit = match[2] || match[3] || unit;
+      if (!isNaN(parsedValue)) {
+        return { value: parsedValue, unit: parsedUnit };
+      }
+    }
+    
+    return undefined;
+  }
+  
+  // Boolean - per spec, true=1, false=0
+  if (typeof value === "boolean") {
+    return { value: value ? 1 : 0, unit };
+  }
+  
+  return undefined;
+}
+
+/**
+ * Check if value can be converted to Date
+ */
+export function convertsToDate(value: unknown): boolean {
+  return toDate(value) !== undefined;
+}
+
+/**
+ * Check if value can be converted to DateTime
+ */
+export function convertsToDateTime(value: unknown): boolean {
+  return toDateTime(value) !== undefined;
+}
+
+/**
+ * Check if value can be converted to Time
+ */
+export function convertsToTime(value: unknown): boolean {
+  return toTime(value) !== undefined;
+}
+
+/**
+ * Check if value can be converted to Quantity
+ */
+export function convertsToQuantity(value: unknown): boolean {
+  return toQuantity(value) !== undefined;
+}
+
 // ============================================================
 // LOGIC FUNCTIONS
 // ============================================================
