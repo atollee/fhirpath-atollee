@@ -97,17 +97,23 @@ export const handler = {
       try {
         const evalStart = performance.now();
         
-        // Use JIT compiler if expression is compatible (much faster)
+        // Try JIT compiler if expression is compatible (much faster)
         if (analysis.jitCompatible) {
-          let jitFn = jitCache.get(expression);
-          if (!jitFn) {
-            jitFn = compileJIT<unknown[]>(expression);
-            jitCache.set(expression, jitFn);
+          try {
+            let jitFn = jitCache.get(expression);
+            if (!jitFn) {
+              jitFn = compileJIT<unknown[]>(expression);
+              jitCache.set(expression, jitFn);
+            }
+            result = jitFn(resource || {}, context);
+            usedJit = true;
+          } catch {
+            // JIT failed, fall back to interpreted
+            const engine = version ? getEngine(version) : defaultEngine;
+            result = engine.evaluate(resource || {}, expression, context);
           }
-          result = jitFn(resource || {}, context);
-          usedJit = true;
         } else {
-          // Fall back to interpreted evaluation
+          // Use interpreted evaluation
           const engine = version ? getEngine(version) : defaultEngine;
           result = engine.evaluate(resource || {}, expression, context);
         }
