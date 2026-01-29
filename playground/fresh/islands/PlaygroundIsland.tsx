@@ -196,7 +196,8 @@ export default function PlaygroundIsland({
       }
 
       setAnalysis(data.analysis || null);
-      setExecutionTime(performance.now() - startTime);
+      // Use server-side evaluation time (pure FHIRPath execution)
+      setExecutionTime(data._meta?.evaluationMs ?? (performance.now() - startTime));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       setResult(null);
