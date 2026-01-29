@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "preact/hooks";
 import type { AnalysisResult } from "../../../src/optimizer/mod.ts";
 import MonacoEditor from "./MonacoEditor.tsx";
+import { type Language, type Translations, getTranslations, STORAGE_KEY as LANG_STORAGE_KEY, DEFAULT_LANGUAGE } from "../utils/i18n.ts";
 
 interface HistoryEntry {
   expression: string;
@@ -48,14 +49,14 @@ const DEFAULT_PATIENT = {
   ],
 };
 
-const SAMPLE_EXPRESSIONS = [
-  { label: "Given names", expression: "name.given" },
-  { label: "Official name", expression: "name.where(use = 'official').given.first()" },
-  { label: "Is active", expression: "active" },
-  { label: "Count names", expression: "name.count()" },
-  { label: "Has phone", expression: "telecom.where(system = 'phone').exists()" },
-  { label: "Identifiers", expression: "identifier.value" },
-  { label: "Type check", expression: "$this is Patient" },
+const getSampleExpressions = (t: Translations) => [
+  { label: t.samples.givenNames, expression: "name.given" },
+  { label: t.samples.officialName, expression: "name.where(use = 'official').given.first()" },
+  { label: t.samples.isActive, expression: "active" },
+  { label: t.samples.countNames, expression: "name.count()" },
+  { label: t.samples.hasPhone, expression: "telecom.where(system = 'phone').exists()" },
+  { label: t.samples.identifiers, expression: "identifier.value" },
+  { label: t.samples.typeCheck, expression: "$this is Patient" },
 ];
 
 export default function PlaygroundIsland({
@@ -80,6 +81,26 @@ export default function PlaygroundIsland({
   const [showFavorites, setShowFavorites] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [lang, setLang] = useState<Language>(DEFAULT_LANGUAGE);
+  const [t, setT] = useState<Translations>(getTranslations(DEFAULT_LANGUAGE));
+
+  // Detect language
+  useEffect(() => {
+    const saved = localStorage.getItem(LANG_STORAGE_KEY) as Language | null;
+    if (saved && (saved === "en" || saved === "de")) {
+      setLang(saved);
+      setT(getTranslations(saved));
+    }
+    
+    const handleLangChange = (e: Event) => {
+      const newLang = (e as CustomEvent).detail as Language;
+      setLang(newLang);
+      setT(getTranslations(newLang));
+    };
+    
+    globalThis.addEventListener("languagechange", handleLangChange);
+    return () => globalThis.removeEventListener("languagechange", handleLangChange);
+  }, []);
 
   // Detect dark mode
   useEffect(() => {
@@ -245,7 +266,7 @@ export default function PlaygroundIsland({
         {/* Resource Input */}
         <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-3">
           <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
-            Resource (JSON)
+            {t.headings.resource}
           </h3>
           <textarea
             value={resourceJson}
@@ -261,12 +282,12 @@ export default function PlaygroundIsland({
           <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-3">
             <div class="flex flex-wrap items-center gap-2 mb-2">
               <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                Expression
+                {t.headings.expression}
               </h3>
               <button
                 onClick={toggleFavorite}
                 class={`text-lg leading-none ${isFavorited ? "text-atollee-orange" : "text-slate-400"} hover:text-atollee-orange transition-colors`}
-                title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+                title={isFavorited ? t.playground.removeFavorite : t.playground.favorite}
               >
                 {isFavorited ? "★" : "☆"}
               </button>
@@ -277,7 +298,7 @@ export default function PlaygroundIsland({
                     ? "bg-atollee text-black"
                     : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
                 }`}
-                title="Copy expression"
+                title={t.playground.copy}
               >
                 {copied ? "✓" : "📋"}
               </button>
@@ -287,7 +308,7 @@ export default function PlaygroundIsland({
                   onClick={() => { setShowHistory(!showHistory); setShowFavorites(false); }}
                   class="text-xs text-slate-500 dark:text-slate-400 link-atollee transition-colors"
                 >
-                  📜 History {showHistory ? "▲" : "▼"}
+                  📜 {t.playground.history} {showHistory ? "▲" : "▼"}
                 </button>
                 {showHistory && history.length > 0 && (
                   <div class="absolute right-0 top-6 z-20 w-64 sm:w-72 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -316,7 +337,7 @@ export default function PlaygroundIsland({
             />
             {/* Sample Expressions - scrollable on mobile */}
             <div class="flex flex-wrap gap-1.5 mt-2 max-h-20 overflow-y-auto">
-              {SAMPLE_EXPRESSIONS.map((s) => (
+              {getSampleExpressions(t).map((s) => (
                 <button
                   key={s.expression}
                   onClick={() => setExpression(s.expression)}
@@ -344,7 +365,7 @@ export default function PlaygroundIsland({
                         : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                     }`}
                   >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    {tab === "result" ? t.playground.result : tab === "ast" ? t.playground.ast : t.playground.hints}
                   </button>
                 ))}
               </div>
@@ -354,7 +375,7 @@ export default function PlaygroundIsland({
                   onClick={() => { setShowFavorites(!showFavorites); setShowHistory(false); }}
                   class="text-xs text-slate-500 dark:text-slate-400 link-atollee transition-colors"
                 >
-                  ⭐ Favorites {showFavorites ? "▲" : "▼"}
+                  ⭐ {t.playground.favorites} {showFavorites ? "▲" : "▼"}
                 </button>
                 {showFavorites && favorites.length > 0 && (
                   <div class="absolute right-0 top-6 z-20 w-64 sm:w-72 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -401,7 +422,7 @@ export default function PlaygroundIsland({
                       {JSON.stringify(result, null, 2)}
                     </pre>
                   ) : (
-                    <div class="text-slate-400 text-sm italic">(empty)</div>
+                    <div class="text-slate-400 text-sm italic">{t.playground.empty}</div>
                   )}
                 </div>
               )}
@@ -441,7 +462,7 @@ export default function PlaygroundIsland({
                     ))
                   ) : (
                     <div class="p-3 bg-[rgba(0,215,215,0.1)] dark:bg-[rgba(0,215,215,0.15)] border-l-4 border-atollee-sea rounded-md text-sm text-atollee-sea">
-                      ✓ No optimization suggestions
+                      ✓ {t.playground.noHints}
                     </div>
                   )}
                 </div>
@@ -460,20 +481,20 @@ export default function PlaygroundIsland({
           {analysis && (
             <>
               <span class="text-slate-500 dark:text-slate-400 hidden sm:inline">
-                📊 Complexity: {analysis.complexity}/100
+                📊 {t.playground.complexity}: {analysis.complexity}/100
               </span>
               <span class={`px-2 py-0.5 rounded text-xs font-medium ${
                 analysis.jitCompatible
                   ? "badge-jit"
                   : "badge-warning"
               }`}>
-                {analysis.jitCompatible ? "✓ JIT" : "⚠ No JIT"}
+                {analysis.jitCompatible ? `✓ ${t.playground.jit}` : `⚠ ${t.playground.noJit}`}
               </span>
             </>
           )}
         </div>
         {loading && (
-          <span class="text-atollee-ocean animate-pulse">Evaluating...</span>
+          <span class="text-atollee-ocean animate-pulse">{t.playground.evaluating}</span>
         )}
       </div>
     </div>

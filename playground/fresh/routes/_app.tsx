@@ -1,6 +1,7 @@
 import { define } from "../utils.ts";
 import { Partial } from "fresh/runtime";
 import ThemeToggle from "../islands/ThemeToggle.tsx";
+import LanguageSwitcher from "../islands/LanguageSwitcher.tsx";
 
 export default define.page(function App({ Component, url }) {
   // Dark mode script to run before render (prevents flash)
@@ -83,6 +84,9 @@ export default define.page(function App({ Component, url }) {
                 >
                   FHIRPath Spec
                 </a>
+                
+                {/* Language Switcher */}
+                <LanguageSwitcher />
                 
                 {/* Dark Mode Toggle - Island component */}
                 <ThemeToggle />
