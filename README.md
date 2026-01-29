@@ -2,7 +2,7 @@
 
 A modern, high-performance FHIRPath implementation in TypeScript - designed as a drop-in replacement for `fhirpath.js` with significant performance improvements.
 
-**Version:** 0.7.5  
+**Version:** 0.7.6  
 **Tests:** 580+ test cases (including official HL7 FHIRPath test suite)  
 **License:** MIT
 
@@ -45,7 +45,7 @@ The standard `fhirpath.js` library (HL7/fhirpath.js) is the reference implementa
 
 ### Feature Comparison (Stand: Januar 2026)
 
-| Feature | fhirpath.js (v4.8.2) | fhirpath-atollee |
+| Feature | fhirpath.js (v4.8.3) | fhirpath-atollee |
 |---------|---------------------|------------------|
 | **AST Caching** | ❌ None | ✅ Global LRU cache (configurable) |
 | **Native TypeScript** | ❌ JavaScript + d.ts | ✅ Full TypeScript |
@@ -76,16 +76,19 @@ The standard `fhirpath.js` library (HL7/fhirpath.js) is the reference implementa
 
 ### Performance Comparison
 
-| Scenario | fhirpath.js 4.8.3 | atollee (interpreted) | atollee (JIT) | JIT Speedup |
-|----------|-------------------|----------------------|---------------|-------------|
-| Simple path (`name.given`) | ~6.5 µs | ~1.4 µs | ~140 ns | **~50x** |
-| Where clause | ~16 µs | ~1.4 µs | ~300 ns | **~50x** |
-| Chained methods | ~9.5 µs | ~1.2 µs | ~130 ns | **~75x** |
-| Complex expression | ~35 µs | ~2.0 µs | ~750 ns | **~45x** |
-| Batch 100 patients | ~440 µs | ~115 µs | ~7 µs | **~60x** |
-| Batch 1000 patients | ~4.3 ms | ~1.15 ms | ~60 µs | **~70x** |
+| Scenario | fhirpath.js 4.8.3 | fhirpath-atollee | Speedup |
+|----------|-------------------|------------------|---------|
+| Simple path (`name.given`) | ~6.6 µs | ~1.4 µs | **~5x** |
+| Dotted path (`name.family`) | ~5.3 µs | ~1.7 µs | **~3x** |
+| Where clause (filter) | ~18.9 µs | ~1.4 µs | **~13x** |
+| Chained methods | ~9.5 µs | ~1.1 µs | **~8x** |
+| Complex expression | ~31.5 µs | ~2.1 µs | **~15x** |
+| Batch 100 patients | ~427 µs | ~111 µs | **~4x** |
+| Compiled (100 patients) | ~57 µs | ~22 µs | **~2.5x** |
 
-*Benchmarks on Apple M3, Deno 2.x, single-threaded. Values vary ±20% between runs due to CPU throttling and system load. Run `deno task bench` for current measurements.*
+**Average Speedup: ~8x faster** than fhirpath.js
+
+*Benchmarks on Apple M3 Max, Deno 2.6.7, single-threaded. Values vary ±20% between runs. Run `deno task bench` for current measurements.*
 
 ---
 
