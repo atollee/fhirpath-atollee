@@ -92,6 +92,43 @@
   border-color: rgb(65, 65, 70) !important;
 }
 
+/* Dark mode button overrides */
+.dark .bg-slate-200 {
+  background-color: rgb(50, 50, 55) !important;
+}
+
+.dark .bg-slate-700 {
+  background-color: rgb(60, 60, 65) !important;
+}
+
+.dark .text-slate-300 {
+  color: #e2e8f0 !important;
+}
+
+.dark .hover\:bg-slate-300:hover {
+  background-color: rgb(60, 60, 65) !important;
+}
+
+.dark .hover\:bg-slate-600:hover {
+  background-color: rgb(70, 70, 75) !important;
+}
+
+.dark .hover\:bg-slate-700:hover {
+  background-color: rgb(55, 55, 60) !important;
+}
+
+/* Ensure text inputs/textareas have contrast in dark mode */
+.dark input,
+.dark textarea {
+  background-color: rgb(20, 20, 22) !important;
+  color: #ffffff !important;
+}
+
+.dark .hover\:text-slate-700:hover,
+.dark .hover\:text-slate-200:hover {
+  color: #ffffff !important;
+}
+
 /* Apply theme colors */
 body {
   background-color: var(--bg-secondary);
