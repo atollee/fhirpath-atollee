@@ -250,7 +250,7 @@ export default function MonacoEditor({
         wordWrap: "on",
         fontSize: 14,
         fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-        padding: { top: 8, bottom: 8 },
+        padding: { top: 4, bottom: 4 },
         automaticLayout: true,
         suggestOnTriggerCharacters: true,
         quickSuggestions: true,
@@ -313,7 +313,7 @@ export default function MonacoEditor({
       )}
       <div
         ref={containerRef}
-        class="w-full rounded-md border border-slate-300 dark:border-slate-600 overflow-hidden p-1"
+        class="w-full rounded-md border border-slate-300 dark:border-slate-600 overflow-hidden"
         style={{ 
           height, 
           minHeight: height, 
