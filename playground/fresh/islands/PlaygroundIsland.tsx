@@ -262,16 +262,16 @@ export default function PlaygroundIsland({
   return (
     <div class="space-y-3">
       {/* Two-column layout on medium+ screens */}
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-stretch">
         {/* Resource Input */}
-        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-3">
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-3 flex flex-col">
           <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
             {t.headings.resource}
           </h3>
           <textarea
             value={resourceJson}
             onInput={(e) => setResourceJson((e.target as HTMLTextAreaElement).value)}
-            class="w-full h-40 sm:h-48 md:h-64 p-2 font-mono text-xs border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[rgb(30,210,255)] focus:border-transparent resize-none"
+            class="w-full flex-1 min-h-[160px] p-2 font-mono text-xs border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[rgb(30,210,255)] focus:border-transparent resize-none"
             spellcheck={false}
           />
         </div>
