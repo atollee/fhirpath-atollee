@@ -494,7 +494,7 @@ export default function PlaygroundIsland({
       <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
         <div class="flex flex-wrap items-center gap-2 sm:gap-3">
           <span class="text-slate-500 dark:text-slate-400">
-            ⏱️ {executionTime.toFixed(1)}ms
+            ⏱️ {(executionTime * 1000).toFixed(0)}µs
           </span>
           {analysis && (
             <>
