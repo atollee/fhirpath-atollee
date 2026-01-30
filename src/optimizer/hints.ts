@@ -123,7 +123,15 @@ export function analyzeExpression(expression: string): AnalysisResult {
   checkComplexity(expression, context);
   checkJitCompatibility(ast, result);
 
-  result.hints = context.hints;
+  // Deduplicate hints by message to avoid showing the same hint multiple times
+  const seenMessages = new Set<string>();
+  result.hints = context.hints.filter(hint => {
+    if (seenMessages.has(hint.message)) {
+      return false;
+    }
+    seenMessages.add(hint.message);
+    return true;
+  });
   result.complexity = calculateComplexity(expression, context);
 
   return result;
