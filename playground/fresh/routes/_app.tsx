@@ -25,14 +25,14 @@ export default define.page(function App({ Component, url }) {
         <meta name="description" content="Interactive FHIRPath expression tester with live evaluation, AST visualization, and optimization hints." />
         
         {/* Favicon */}
-        <link rel="icon" type="image/png" href="/healthruntime-logo.png" />
+        <link rel="icon" type="image/webp" href="/logo.webp" />
         
         {/* Open Graph for Social Sharing */}
         <meta property="og:title" content="FHIRPath Playground - atollee" />
         <meta property="og:description" content="Test FHIRPath expressions interactively with live evaluation and optimization hints. JIT compiler delivers up to 25x faster execution than fhirpath.js." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={url.href} />
-        <meta property="og:image" content="/healthruntime-logo.png" />
+        <meta property="og:image" content="/logo.webp" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary" />
@@ -53,8 +53,8 @@ export default define.page(function App({ Component, url }) {
             <div class="flex justify-between h-14">
               {/* Logo & Title */}
               <div class="flex items-center space-x-2 sm:space-x-4">
-                <a href="/" class="flex items-center space-x-2">
-                  <img src="/healthruntime-logo.png" alt="HealthRuntime" class="h-7 sm:h-8 w-auto" />
+                <a href="/" class="flex items-center space-x-3">
+                  <img src="/logo.webp" alt="HealthRuntime" class="h-7 sm:h-8 w-auto" />
                   <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white hidden xs:inline">
                     FHIRPath Playground
                   </span>
@@ -63,7 +63,7 @@ export default define.page(function App({ Component, url }) {
                   </span>
                 </a>
                 <span class="badge-version px-2 py-0.5 text-xs font-medium rounded hidden sm:inline">
-                  v0.7.5
+                  v0.7.6
                 </span>
               </div>
               

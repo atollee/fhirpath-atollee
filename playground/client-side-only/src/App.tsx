@@ -36,13 +36,18 @@ export function App() {
   return (
     <div class="min-h-screen bg-slate-100 dark:bg-slate-900">
       {/* Header */}
-      <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div class="flex items-center justify-between h-14 sm:h-16">
-            <div class="flex items-center gap-2 sm:gap-3">
-              <span class="text-xl sm:text-2xl font-bold text-atollee-ocean">⚡</span>
-              <span class="text-base sm:text-lg font-semibold text-slate-800 dark:text-white">
-                {t.nav.playground}
+      <nav class="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between h-14">
+            <div class="flex items-center space-x-2 sm:space-x-4">
+              <a href="/" class="flex items-center space-x-3">
+                <img src={`${import.meta.env.BASE_URL}logo.webp`} alt="HealthRuntime" class="h-7 sm:h-8 w-auto" />
+                <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white">
+                  FHIRPath
+                </span>
+              </a>
+              <span class="badge-version px-2 py-0.5 text-xs font-medium rounded hidden sm:inline">
+                v0.7.6
               </span>
             </div>
             
@@ -79,7 +84,7 @@ export function App() {
             </nav>
           </div>
         </div>
-      </header>
+      </nav>
 
       {/* Main Content */}
       <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
