@@ -67,21 +67,6 @@ export {
 } from "./src/evaluator/mod.ts";
 export { functions as fhirPathFunctions } from "./src/evaluator/mod.ts";
 
-// Export worker pool for parallel evaluation
-export {
-  FhirPathWorkerPool,
-  getGlobalWorkerPool,
-  shutdownGlobalPool,
-} from "./src/worker/mod.ts";
-export type {
-  WorkerTask,
-  WorkerResult,
-  WorkerPoolConfig,
-  WorkerPoolStats,
-  BatchEvaluationOptions,
-  BatchEvaluationResult,
-} from "./src/worker/mod.ts";
-
 // Export terminology service
 export {
   type ITerminologyService,

@@ -54,9 +54,9 @@ The standard `fhirpath.js` library (HL7/fhirpath.js) is the reference implementa
 | **ESM Support** | ⚠️ Via wrapper | ✅ Native ESM |
 | **Deno Support** | ⚠️ Requires --unstable-detect-cjs | ✅ Native |
 | **Parser** | ANTLR4 (~500KB) | Native TypeScript (~50KB) |
-| **Parallelization** | ❌ Global state | ✅ Worker Pool |
+| **Parallelization** | ❌ Global state | ✅ Stateless (no global state) |
 | **Cache Statistics** | ❌ None | ✅ Built-in |
-| **Async Evaluation** | ✅ v3.15.0+ (signal) | ✅ Worker Pool |
+| **Async Evaluation** | ✅ v3.15.0+ (signal) | ✅ Promise-based |
 | **Terminology Service** | ✅ %terminologies | ✅ Implemented |
 | **Type Factory** | ✅ %factory | ✅ Implemented |
 | **aggregate()** | ✅ | ✅ Full $total/$this support |
@@ -398,28 +398,6 @@ fhirpath.evaluate(xssPatient, "text.div.htmlChecks()");
 // - Basic tag balance validation
 ```
 
-### Parallel Evaluation with Worker Pool
-
-```typescript
-import { FhirPathWorkerPool } from "@atollee/fhirpath-atollee";
-
-// Create a worker pool
-const pool = new FhirPathWorkerPool({ poolSize: 4 });
-await pool.initialize();
-
-// Batch evaluation across many resources
-const result = await pool.evaluateBatch({
-  expression: "name.given.first()",
-  resources: patients,  // Array of 1000+ patients
-  chunkSize: 100,       // Process in chunks
-});
-
-console.log(`Evaluated ${result.resourceCount} patients in ${result.totalDurationMs}ms`);
-
-// Cleanup
-await pool.shutdown();
-```
-
 ### Native Parser Access
 
 ```typescript
@@ -500,25 +478,6 @@ class ExpressionCache {
   get hits(): number;
   get misses(): number;
   get hitRate(): number;
-}
-```
-
-### FhirPathWorkerPool
-
-```typescript
-class FhirPathWorkerPool {
-  constructor(config?: {
-    poolSize?: number;      // Default: navigator.hardwareConcurrency
-    workerUrl?: string;     // Custom worker script
-  });
-
-  initialize(): Promise<void>;
-  shutdown(): Promise<void>;
-  
-  evaluate(task: WorkerTask): Promise<WorkerResult>;
-  evaluateBatch(options: BatchEvaluationOptions): Promise<BatchEvaluationResult>;
-  
-  getStats(): WorkerPoolStats;
 }
 ```
 
@@ -950,16 +909,6 @@ const abnormalLabs = evaluate(bundle,
 │  │  LRU Cache      │  │  Native Parser   │  │  Evaluator      │  │
 │  │  (AST storage)  │  │  (TypeScript)    │  │  (65+ functions)│  │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
-└────────────────────────────┬─────────────────────────────────────┘
-                             │
-┌────────────────────────────▼─────────────────────────────────────┐
-│                      Worker Pool (optional)                       │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
-│  │ Worker 1 │  │ Worker 2 │  │ Worker 3 │  │ Worker N │        │
-│  │ (Parser) │  │ (Parser) │  │ (Parser) │  │ (Parser) │        │
-│  │ (Cache)  │  │ (Cache)  │  │ (Cache)  │  │ (Cache)  │        │
-│  │ (Eval)   │  │ (Eval)   │  │ (Eval)   │  │ (Eval)   │        │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘        │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -979,14 +928,10 @@ packages/fhirpath-atollee/
 │   │   ├── parser.ts         # Recursive descent parser
 │   │   ├── ast.ts            # AST node definitions
 │   │   └── tokens.ts         # Token type definitions
-│   ├── evaluator/
-│   │   ├── evaluator.ts      # Expression evaluator
-│   │   ├── functions.ts      # Built-in FHIRPath functions
-│   │   └── types.ts          # Evaluator types
-│   └── worker/
-│       ├── pool.ts           # Worker pool management
-│       ├── worker.ts         # Worker thread implementation
-│       └── types.ts          # Worker types
+│   └── evaluator/
+│       ├── evaluator.ts      # Expression evaluator
+│       ├── functions.ts      # Built-in FHIRPath functions
+│       └── types.ts          # Evaluator types
 ├── fhir-context/
 │   ├── r4/                   # FHIR R4 model
 │   ├── r4b/                  # FHIR R4B model
@@ -997,8 +942,7 @@ packages/fhirpath-atollee/
 │   ├── parser_test.ts        # Parser tests
 │   ├── evaluator_test.ts     # Evaluator tests
 │   ├── complex_expressions_test.ts
-│   ├── official_fhirpath_test.ts  # HL7 test suite
-│   └── worker_pool_test.ts   # Parallelization tests
+│   └── official_fhirpath_test.ts  # HL7 test suite
 └── benchmarks/
     ├── performance_bench.ts   # Overall performance
     ├── native_evaluator_bench.ts
@@ -1017,7 +961,7 @@ packages/fhirpath-atollee/
 
 3. **Optimized Evaluator**: Direct evaluation without intermediate representations.
 
-4. **Shared-Nothing Workers**: True parallel execution without lock contention.
+4. **Stateless Design**: No global state enables safe concurrent use.
 
 ### Benchmarks
 
@@ -1295,8 +1239,7 @@ deno test -A --coverage packages/fhirpath-atollee/tests/
 | Evaluator | 45 | Function evaluation |
 | Complex | 15 | Complex expressions |
 | Official | 68 | HL7 FHIRPath test suite |
-| Worker Pool | 27 | Parallelization |
-| **Total** | **233** | |
+| **Total** | **206** | |
 
 ---
 
@@ -1308,7 +1251,6 @@ deno test -A --coverage packages/fhirpath-atollee/tests/
 - [x] Native TypeScript Lexer
 - [x] Native TypeScript Parser
 - [x] Native TypeScript Evaluator (80+ functions)
-- [x] Worker pool for parallel evaluation
 - [x] HealthRuntime Plugin integration
 - [x] Official HL7 test suite integration
 
