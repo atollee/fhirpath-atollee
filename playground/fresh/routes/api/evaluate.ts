@@ -74,9 +74,6 @@ function getEngine(version: FhirVersion): FhirPathEngine {
 const defaultEngine = new FhirPathEngine();
 
 // fhirpath.js compiled function cache
-// deno-lint-ignore no-explicit-any
-const fhirpathJsCache = new Map<string, (resource: any, context?: any) => any[]>();
-
 export const handler = {
   async POST(req: Request): Promise<Response> {
     const startTime = performance.now();
@@ -143,6 +140,7 @@ export const handler = {
       }
 
       // Benchmark fhirpath.js for comparison (if no error and fhirpath.js available)
+      // FAIR COMPARISON: Both measure compile() + evaluate() for consistency
       let fhirpathJsError: string | null = fhirpathJsLoadError;
       if (!error && !fhirpathJsLoadError) {
         try {
@@ -151,13 +149,9 @@ export const handler = {
           if (!fp) {
             fhirpathJsError = fhirpathJsLoadError || "fhirpath.js not available in Deno runtime";
           } else {
-            let compiledFn = fhirpathJsCache.get(expression);
-            if (!compiledFn) {
-              compiledFn = fp.compile(expression);
-              fhirpathJsCache.set(expression, compiledFn);
-            }
-            
+            // Fair comparison: measure compile + evaluate (same as atollee)
             const fhirpathJsStart = performance.now();
+            const compiledFn = fp.compile(expression);
             compiledFn(resource || {}, context || {});
             fhirpathJsDuration = performance.now() - fhirpathJsStart;
           }
