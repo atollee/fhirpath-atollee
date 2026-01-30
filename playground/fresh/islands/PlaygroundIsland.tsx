@@ -521,8 +521,8 @@ export default function PlaygroundIsland({
               minHeight={38}
               maxHeight={150}
             />
-            {/* Sample Expressions - scrollable on mobile */}
-            <div class="flex flex-wrap gap-1.5 mt-2 max-h-20 overflow-y-auto">
+            {/* Sample Expressions */}
+            <div class="flex flex-wrap gap-1.5 mt-2">
               {getSampleExpressions(t).map((s) => (
                 <button
                   key={s.expression}
@@ -533,7 +533,9 @@ export default function PlaygroundIsland({
                   {s.label}
                 </button>
               ))}
-              {/* Browse All Expressions Button */}
+            </div>
+            {/* Browse All Expressions Button - always on new line */}
+            <div class="mt-2">
               <button
                 onClick={() => { setShowExpressionBrowser(!showExpressionBrowser); setShowHistory(false); setShowFavorites(false); }}
                 class="px-2 py-0.5 text-xs bg-atollee-ocean/10 dark:bg-atollee-sea/20 text-atollee-ocean dark:text-atollee-sea rounded hover:bg-atollee-ocean/20 dark:hover:bg-atollee-sea/30 transition-colors whitespace-nowrap font-medium"
