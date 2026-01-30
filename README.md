@@ -30,21 +30,21 @@ A modern, high-performance FHIRPath implementation in TypeScript - designed as a
 
 ## Motivation
 
-### Ein Team. Eine Codebase. Eine Quelle der Wahrheit.
+### One Team. One Codebase. One Source of Truth.
 
-**fhirpath-atollee** entstand aus einer praktischen Anforderung: Wir brauchten eine FHIRPath-Implementierung, die nahtlos in **HealthRuntime** – unser performantes, resilientes FHIR-Backend – integriert werden kann, und die **exakt gleiche Logik** auch im Frontend ausführbar ist.
+**fhirpath-atollee** was born from a practical need: We required a FHIRPath implementation that integrates seamlessly into **HealthRuntime** – our performant, resilient FHIR backend – while running the **exact same logic** in the frontend.
 
-**Das Problem mit fhirpath.js:**
+**The problem with fhirpath.js:**
 
-| Limitation | Konsequenz |
-|------------|------------|
-| ANTLR4 Runtime (~500KB) | Zu groß für Browser-Deployment |
-| CommonJS + Global State | Keine echte Parallelisierung, ESM-Friction |
-| Kein AST-Caching | Jede Auswertung parst neu |
+| Limitation | Consequence |
+|------------|-------------|
+| ANTLR4 Runtime (~500KB) | Too heavy for browser deployment |
+| CommonJS + Global State | No real parallelization, ESM friction |
+| No AST Caching | Re-parses on every evaluation |
 
-**Die Lösung:**
+**The solution:**
 
-Eine native TypeScript-Implementierung, die **isomorph** läuft – im Deno-Backend der HealthRuntime genauso wie im Browser einer SMART-on-FHIR App.
+A native TypeScript implementation that runs **isomorphically** – in HealthRuntime's Deno backend just as in the browser of a SMART-on-FHIR app.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -60,30 +60,30 @@ Eine native TypeScript-Implementierung, die **isomorph** läuft – im Deno-Back
 │                      │                                          │
 │            ┌─────────▼─────────┐                                │
 │            │ fhirpath-atollee  │                                │
-│            │  (gleiche Lib)    │                                │
+│            │   (same library)  │                                │
 │            └───────────────────┘                                │
 │                                                                 │
-│   → Gleiche FHIRPath-Ausdrücke, gleiches Verhalten              │
-│   → Validierung im Frontend, Ausführung im Backend              │
-│   → Kein "works on my machine"                                  │
+│   → Same FHIRPath expressions, same behavior                    │
+│   → Validate in frontend, execute in backend                    │
+│   → No "works on my machine"                                    │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Warum das wichtig ist
+### Why This Matters
 
-- **Sorglos-Backend**: HealthRuntime kümmert sich um Persistenz, Suche, Subscriptions – FHIRPath-Ausdrücke in SearchParameters, Invariants und CQL werden mit fhirpath-atollee ausgewertet
-- **Frontend bei Bedarf**: Die gleiche Library läuft im Browser für Client-seitige Validierung, UI-Logik oder Offline-Szenarien
-- **Eine Quelle der Wahrheit**: Entwickler schreiben FHIRPath einmal, es verhält sich überall gleich
+- **Worry-free Backend**: HealthRuntime handles persistence, search, subscriptions – FHIRPath expressions in SearchParameters, Invariants, and CQL are evaluated with fhirpath-atollee
+- **Frontend When Needed**: The same library runs in the browser for client-side validation, UI logic, or offline scenarios
+- **Single Source of Truth**: Developers write FHIRPath once, it behaves the same everywhere
 
-### Praktische Vorteile
+### Practical Benefits
 
-| Aspekt | Vorteil |
+| Aspect | Benefit |
 |--------|---------|
-| **Performance** | 8-78x schneller durch AST-Caching und JIT |
-| **Bundle Size** | ~50KB statt ~500KB – lädt instant im Browser |
-| **Parallelisierung** | Stateless = sichere parallele Ausführung |
-| **API-Kompatibilität** | Drop-in Ersatz für fhirpath.js |
+| **Performance** | 8-78x faster through AST caching and JIT |
+| **Bundle Size** | ~50KB instead of ~500KB – loads instantly in browser |
+| **Parallelization** | Stateless = safe concurrent execution |
+| **API Compatibility** | Drop-in replacement for fhirpath.js |
 
 ---
 
