@@ -779,6 +779,8 @@ await log.time("Database query", async () => {
 
 ### FHIRPath Playground (v0.7.2)
 
+**🌐 Try it online: [fhirpath.atollee.com](https://fhirpath.atollee.com)**
+
 Interactive playground for testing FHIRPath expressions with **three deployment options**:
 
 #### Option 1: Server-Side Rendered (Deno Fresh 2.2.0) — Recommended
