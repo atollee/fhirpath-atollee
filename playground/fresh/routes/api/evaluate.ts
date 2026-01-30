@@ -13,7 +13,6 @@
 import { FhirPathEngine } from "../../../../src/engine.ts";
 import { parseFhirPath } from "../../../../src/parser/mod.ts";
 import { analyzeExpression } from "../../../../src/optimizer/mod.ts";
-import { compileJIT, type CompiledFhirPath } from "../../../../src/jit/mod.ts";
 import { loggers } from "../../../../src/logging.ts";
 
 // fhirpath.js comparison is optional - ANTLR4 has known issues in Deno
@@ -74,9 +73,6 @@ function getEngine(version: FhirVersion): FhirPathEngine {
 // Default engine (no model, for basic evaluation)
 const defaultEngine = new FhirPathEngine();
 
-// JIT function cache
-const jitCache = new Map<string, CompiledFhirPath<unknown[]>>();
-
 // fhirpath.js compiled function cache
 // deno-lint-ignore no-explicit-any
 const fhirpathJsCache = new Map<string, (resource: any, context?: any) => any[]>();
@@ -121,36 +117,20 @@ export const handler = {
       // Analyze expression for optimization hints
       const analysis = analyzeExpression(expression);
 
-      // Evaluate - use JIT if compatible, otherwise interpreted
+      // Evaluate using interpreted mode (faster cold start, ~5-7x faster than fhirpath.js)
+      // JIT is only beneficial for batch operations with 100+ repetitions
       let result = null;
       let error = null;
       let evalDuration = 0;
-      let usedJit = false;
+      const jitCompatible = analysis.jitCompatible; // For display purposes
       let fhirpathJsDuration: number | null = null;
 
       try {
         const evalStart = performance.now();
         
-        // Try JIT compiler if expression is compatible (much faster)
-        if (analysis.jitCompatible && ast) {
-          try {
-            let jitFn = jitCache.get(expression);
-            if (!jitFn) {
-              jitFn = compileJIT<unknown[]>(ast);
-              jitCache.set(expression, jitFn);
-            }
-            result = jitFn(resource || {}, context);
-            usedJit = true;
-          } catch {
-            // JIT failed, fall back to interpreted
-            const engine = version ? getEngine(version) : defaultEngine;
-            result = engine.evaluate(resource || {}, expression, context);
-          }
-        } else {
-          // Use interpreted evaluation
-          const engine = version ? getEngine(version) : defaultEngine;
-          result = engine.evaluate(resource || {}, expression, context);
-        }
+        // Use interpreted evaluation (fastest for single calls)
+        const engine = version ? getEngine(version) : defaultEngine;
+        result = engine.evaluate(resource || {}, expression, context);
         
         evalDuration = performance.now() - evalStart;
       } catch (e) {
@@ -220,7 +200,8 @@ export const handler = {
         _meta: {
           evaluationMs: evalDuration,
           totalMs: totalDuration,
-          usedJit,
+          mode: "interpreted", // Fastest for single calls (5-7x faster than fhirpath.js)
+          jitCompatible, // Would be JIT-compatible for batch operations
           fhirpathJsMs: fhirpathJsDuration,
           fhirpathJsError,
           speedup,

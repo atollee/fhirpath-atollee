@@ -80,18 +80,24 @@ The standard `fhirpath.js` library (HL7/fhirpath.js) is the reference implementa
 | `inspect()` | ❌ | ✅ | atollee extension - debugging |
 | `registry` | ❌ | ✅ | atollee extension - introspection |
 
-### Performance Comparison (JIT)
+### Performance Comparison
+
+**Cold Start (realistic FHIR POST/GET scenario):**
+
+| Scenario | fhirpath.js 4.8.3 | fhirpath-atollee | Speedup |
+|----------|-------------------|------------------|---------|
+| Simple path (`name.given`) | ~5.3 ms | ~754 µs | **~7x** |
+| Property access (`birthDate`) | ~227 µs | ~34 µs | **~7x** |
+| Where clause (filter) | ~505 µs | ~77 µs | **~7x** |
+
+**Batch Processing (JIT, repeated evaluations):**
 
 | Scenario | fhirpath.js 4.8.3 | fhirpath-atollee JIT | Speedup |
 |----------|-------------------|----------------------|---------|
-| Simple path (`name.given`) | ~5.9 µs | ~116 ns | **~51x** |
-| Where clause (filter) | ~15.1 µs | ~278 ns | **~54x** |
-| Chained methods | ~9.3 µs | ~118 ns | **~79x** |
-| Complex expression | ~32.0 µs | ~735 ns | **~44x** |
 | Batch 100 patients | ~427 µs | ~6.6 µs | **~64x** |
 | Large batch 1000 patients | ~4.21 ms | ~54 µs | **~78x** |
 
-**Average Speedup: ~57x faster** than fhirpath.js
+**Average Speedup: ~5-7x faster** (cold start), **~57x faster** (batch with JIT)
 
 *Benchmarks on Apple M3 Max, Deno 2.6.7, single-threaded. Values vary ±20% between runs. Run `deno task bench` for current measurements.*
 
@@ -1294,11 +1300,11 @@ deno test -A --coverage packages/fhirpath-atollee/tests/
   - Live expression testing
 
 ### Completed (v0.7.0) - Januar 2026
-- [x] JIT Compiler for Maximum Performance
+- [x] JIT Compiler for Batch Operations
   - Compiles FHIRPath AST to native JavaScript
-  - **Up to 78x faster** than fhirpath.js (57x average)
+  - **Up to 78x faster** for batch/bulk operations (1000+ resources)
   - 100% JIT coverage for all FHIRPath functions
-  - Cached compilation for repeated use
+  - Automatic mode selection: interpreted (cold) vs JIT (warm)
 - [x] Monaco Editor Extension
   - Syntax highlighting with Monarch tokenizer
   - Intelligent autocomplete for functions, operators, paths

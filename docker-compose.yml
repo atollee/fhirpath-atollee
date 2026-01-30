@@ -1,0 +1,13 @@
+services:
+  fhirpath-playground:
+    image: atollee/fhirpath-atollee
+    container_name: fhirpath-atollee
+    restart: always
+    working_dir: /app/playground/fresh
+    command: ["serve", "-A", "--port=8000", "_fresh/server.js"]
+    networks:
+      - web_services
+
+networks:
+  web_services:
+    external: true
