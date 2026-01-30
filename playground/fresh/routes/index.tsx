@@ -1,6 +1,6 @@
 import { define } from "../utils.ts";
 import PlaygroundIsland from "../islands/PlaygroundIsland.tsx";
-import { PageHeader, FeatureCards } from "../islands/TranslatedContent.tsx";
+import { PageHeader } from "../islands/TranslatedContent.tsx";
 import { createDefaultAPI } from "../../../src/api.ts";
 import { analyzeExpression } from "../../../src/optimizer/mod.ts";
 
@@ -94,9 +94,6 @@ export default define.page(function PlaygroundPage({ url }) {
         initialResult={initialResult}
         initialError={initialError}
       />
-
-      {/* Translated feature cards (Island) */}
-      <FeatureCards />
     </div>
   );
 });
