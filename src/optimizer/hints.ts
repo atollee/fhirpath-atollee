@@ -515,15 +515,46 @@ function checkJitNode(node: ASTNode, unsupported: string[]): void {
       const methodCall = node as MethodCallNode;
       const methodName = methodCall.method.name;
       
-      // List of JIT-supported methods
+      // List of JIT-supported methods (100% coverage as of v0.7.6)
       const jitSupported = new Set([
+        // Collection
         "where", "first", "last", "single", "skip", "take", "tail",
-        "count", "empty", "exists", "all", "select", "distinct",
-        "not", "hasValue", "iif", "ofType", "toString", "toInteger",
-        "toDecimal", "toBoolean", "startsWith", "endsWith", "contains",
-        "matches", "replace", "length", "substring", "upper", "lower",
-        "trim", "split", "join", "indexOf", "union", "combine",
-        "intersect", "exclude", "repeat", "children", "descendants",
+        "count", "empty", "exists", "all", "select", "distinct", "repeat",
+        // Existence
+        "allTrue", "anyTrue", "allFalse", "anyFalse", "hasValue",
+        "isDistinct", "subsetOf", "supersetOf",
+        // Aggregate
+        "sum", "min", "max", "avg", "aggregate",
+        // Math
+        "abs", "ceiling", "floor", "round", "truncate",
+        "sqrt", "exp", "ln", "log", "power",
+        // String
+        "startsWith", "endsWith", "contains", "matches", "replace",
+        "replaceMatches", "length", "substring", "upper", "lower",
+        "trim", "split", "join", "indexOf", "toChars",
+        // Type
+        "ofType", "as", "is", "type",
+        // Conversion
+        "toString", "toInteger", "toDecimal", "toBoolean",
+        "toDate", "toDateTime", "toTime", "toQuantity",
+        // Conversion checks
+        "convertsToString", "convertsToInteger", "convertsToDecimal",
+        "convertsToBoolean", "convertsToDate", "convertsToDateTime",
+        "convertsToTime", "convertsToQuantity",
+        // Boolean
+        "not", "iif",
+        // DateTime
+        "now", "today", "timeOfDay",
+        // FHIR
+        "extension", "hasExtension", "getValue", "resolve", "memberOf", "htmlChecks",
+        // Navigation
+        "children", "descendants",
+        // Combining
+        "union", "combine", "intersect", "exclude",
+        // Encoding
+        "encode", "decode",
+        // Utility
+        "trace", "defineVariable",
       ]);
       
       if (!jitSupported.has(methodName) && !unsupported.includes(methodName)) {
