@@ -30,16 +30,60 @@ A modern, high-performance FHIRPath implementation in TypeScript - designed as a
 
 ## Motivation
 
-The standard `fhirpath.js` library (HL7/fhirpath.js) is the reference implementation for FHIRPath in JavaScript. While feature-complete, it has several architectural limitations that impact performance in high-throughput scenarios:
+### Ein Team. Eine Codebase. Eine Quelle der Wahrheit.
 
-| Problem | Impact |
-|---------|--------|
-| No AST caching | Expressions are re-parsed on every evaluation |
-| Global state | Prevents true parallel execution |
-| ANTLR4 dependency | Heavy runtime overhead (~500KB) |
-| CommonJS legacy | Complex module resolution in Deno/ESM |
+**fhirpath-atollee** entstand aus einer praktischen Anforderung: Wir brauchten eine FHIRPath-Implementierung, die nahtlos in **HealthRuntime** – unser performantes, resilientes FHIR-Backend – integriert werden kann, und die **exakt gleiche Logik** auch im Frontend ausführbar ist.
 
-**fhirpath-atollee** addresses these issues with a ground-up native TypeScript implementation.
+**Das Problem mit fhirpath.js:**
+
+| Limitation | Konsequenz |
+|------------|------------|
+| ANTLR4 Runtime (~500KB) | Zu groß für Browser-Deployment |
+| CommonJS + Global State | Keine echte Parallelisierung, ESM-Friction |
+| Kein AST-Caching | Jede Auswertung parst neu |
+
+**Die Lösung:**
+
+Eine native TypeScript-Implementierung, die **isomorph** läuft – im Deno-Backend der HealthRuntime genauso wie im Browser einer SMART-on-FHIR App.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    HealthRuntime Stack                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   ┌─────────────┐         ┌─────────────────────┐              │
+│   │   Frontend  │         │  HealthRuntime      │              │
+│   │  (Browser)  │  ←───→  │  (Deno Backend)     │              │
+│   └──────┬──────┘         └──────────┬──────────┘              │
+│          │                           │                          │
+│          └───────────┬───────────────┘                          │
+│                      │                                          │
+│            ┌─────────▼─────────┐                                │
+│            │ fhirpath-atollee  │                                │
+│            │  (gleiche Lib)    │                                │
+│            └───────────────────┘                                │
+│                                                                 │
+│   → Gleiche FHIRPath-Ausdrücke, gleiches Verhalten              │
+│   → Validierung im Frontend, Ausführung im Backend              │
+│   → Kein "works on my machine"                                  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Warum das wichtig ist
+
+- **Sorglos-Backend**: HealthRuntime kümmert sich um Persistenz, Suche, Subscriptions – FHIRPath-Ausdrücke in SearchParameters, Invariants und CQL werden mit fhirpath-atollee ausgewertet
+- **Frontend bei Bedarf**: Die gleiche Library läuft im Browser für Client-seitige Validierung, UI-Logik oder Offline-Szenarien
+- **Eine Quelle der Wahrheit**: Entwickler schreiben FHIRPath einmal, es verhält sich überall gleich
+
+### Praktische Vorteile
+
+| Aspekt | Vorteil |
+|--------|---------|
+| **Performance** | 8-78x schneller durch AST-Caching und JIT |
+| **Bundle Size** | ~50KB statt ~500KB – lädt instant im Browser |
+| **Parallelisierung** | Stateless = sichere parallele Ausführung |
+| **API-Kompatibilität** | Drop-in Ersatz für fhirpath.js |
 
 ---
 
