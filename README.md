@@ -82,24 +82,29 @@ The standard `fhirpath.js` library (HL7/fhirpath.js) is the reference implementa
 
 ### Performance Comparison
 
-**Cold Start (realistic FHIR POST/GET scenario):**
+**Fair Comparison** (both libraries: compile + evaluate per call)
 
-| Scenario | fhirpath.js 4.8.3 | fhirpath-atollee | Speedup |
-|----------|-------------------|------------------|---------|
-| Simple path (`name.given`) | ~5.3 ms | ~754 µs | **~7x** |
-| Property access (`birthDate`) | ~227 µs | ~34 µs | **~7x** |
-| Where clause (filter) | ~505 µs | ~77 µs | **~7x** |
+| Expression | fhirpath.js 4.8.3 | fhirpath-atollee | Speedup |
+|------------|-------------------|------------------|---------|
+| `name.given` | 40 µs | 3 µs | **12x** |
+| `name.family` | 21 µs | 3 µs | **7x** |
+| `birthDate` | 11 µs | 2 µs | **5x** |
+| `name.where(family = 'Doe')` | 48 µs | 4 µs | **13x** |
+| `telecom.where(system = 'phone').value` | 34 µs | 4 µs | **9x** |
+| `name.given.first()` | 18 µs | 3 µs | **6x** |
+| `active.not()` | 11 µs | 2 µs | **6x** |
+| `name.exists()` | 9 µs | 2 µs | **5x** |
 
-**Batch Processing (JIT, repeated evaluations):**
+**Average Speedup: ~8x faster** than fhirpath.js
+
+**Batch Processing with JIT** (repeated evaluations, 1000+ resources):
 
 | Scenario | fhirpath.js 4.8.3 | fhirpath-atollee JIT | Speedup |
 |----------|-------------------|----------------------|---------|
 | Batch 100 patients | ~427 µs | ~6.6 µs | **~64x** |
 | Large batch 1000 patients | ~4.21 ms | ~54 µs | **~78x** |
 
-**Average Speedup: ~5-7x faster** (cold start), **~57x faster** (batch with JIT)
-
-*Benchmarks on Apple M3 Max, Deno 2.6.7, single-threaded. Values vary ±20% between runs. Run `deno task bench` for current measurements.*
+*Benchmarks on Apple M3 Max, Deno 2.6.7. Values vary ±20% between runs.*
 
 ---
 
