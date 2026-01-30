@@ -6,6 +6,8 @@ A modern, high-performance FHIRPath implementation in TypeScript - designed as a
 **Tests:** 602 test cases (including official HL7 FHIRPath test suite)  
 **License:** MIT
 
+**🌐 [Try it online: fhirpath.atollee.com](https://fhirpath.atollee.com)**
+
 ---
 
 ## Table of Contents
