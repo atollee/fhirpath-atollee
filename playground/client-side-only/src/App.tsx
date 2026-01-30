@@ -40,12 +40,14 @@ export function App() {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex justify-between h-14">
             <div class="flex items-center space-x-2 sm:space-x-4">
-              <a href="/" class="flex items-center space-x-3">
-                <img src={`${import.meta.env.BASE_URL}logo.webp`} alt="HealthRuntime" class="h-7 sm:h-8 w-auto" />
+              <div class="flex items-center space-x-3">
+                <a href="https://atollee.com">
+                  <img src={`${import.meta.env.BASE_URL}logo.webp`} alt="atollee" class="h-7 sm:h-8 w-auto" />
+                </a>
                 <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white">
                   FHIRPath
                 </span>
-              </a>
+              </div>
               <span class="badge-version px-2 py-0.5 text-xs font-medium rounded hidden sm:inline">
                 v0.7.6
               </span>

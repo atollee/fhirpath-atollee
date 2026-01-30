@@ -53,15 +53,17 @@ export default define.page(function App({ Component, url }) {
             <div class="flex justify-between h-14">
               {/* Logo & Title */}
               <div class="flex items-center space-x-2 sm:space-x-4">
-                <a href="https://atollee.com" class="flex items-center space-x-3">
-                  <img src="/logo.webp" alt="atollee" class="h-7 sm:h-8 w-auto" />
+                <div class="flex items-center space-x-3">
+                  <a href="https://atollee.com">
+                    <img src="/logo.webp" alt="atollee" class="h-7 sm:h-8 w-auto" />
+                  </a>
                   <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white hidden xs:inline">
                     FHIRPath Playground
                   </span>
                   <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white xs:hidden">
                     FHIRPath
                   </span>
-                </a>
+                </div>
                 <span class="badge-version px-2 py-0.5 text-xs font-medium rounded hidden sm:inline">
                   v0.7.6
                 </span>
