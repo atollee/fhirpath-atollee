@@ -47,27 +47,27 @@ A modern, high-performance FHIRPath implementation in TypeScript - designed as a
 A native TypeScript implementation that runs **isomorphically** – in HealthRuntime's Deno backend just as in the browser of a SMART-on-FHIR app.
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    HealthRuntime Stack                          │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
+┌────────────────────────────────────────────────────────────────┐
+│                    HealthRuntime Stack                         │
+├────────────────────────────────────────────────────────────────┤
+│                                                                │
 │   ┌─────────────┐         ┌─────────────────────┐              │
 │   │   Frontend  │         │  HealthRuntime      │              │
 │   │  (Browser)  │  ←───→  │  (Deno Backend)     │              │
 │   └──────┬──────┘         └──────────┬──────────┘              │
-│          │                           │                          │
-│          └───────────┬───────────────┘                          │
-│                      │                                          │
-│            ┌─────────▼─────────┐                                │
-│            │ fhirpath-atollee  │                                │
-│            │   (same library)  │                                │
-│            └───────────────────┘                                │
-│                                                                 │
-│   → Same FHIRPath expressions, same behavior                    │
-│   → Validate in frontend, execute in backend                    │
-│   → No "works on my machine"                                    │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+│          │                           │                         │
+│          └───────────┬───────────────┘                         │
+│                      │                                         │
+│            ┌─────────▼─────────┐                               │
+│            │ fhirpath-atollee  │                               │
+│            │   (same library)  │                               │
+│            └───────────────────┘                               │
+│                                                                │
+│   → Same FHIRPath expressions, same behavior                   │
+│   → Validate in frontend, execute in backend                   │
+│   → No "works on my machine"                                   │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
 ```
 
 ### Why This Matters
@@ -953,16 +953,16 @@ const abnormalLabs = evaluate(bundle,
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                        Public API                                 │
+│                        Public API                                │
 │  evaluate() / compile() / parse() / types() / version            │
 └────────────────────────────┬─────────────────────────────────────┘
                              │
 ┌────────────────────────────▼─────────────────────────────────────┐
-│                      FhirPathEngine                               │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
+│                      FhirPathEngine                              │
+│  ┌─────────────────┐  ┌──────────────────┐  ┌─────────────────┐  │
 │  │  LRU Cache      │  │  Native Parser   │  │  Evaluator      │  │
 │  │  (AST storage)  │  │  (TypeScript)    │  │  (65+ functions)│  │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
+│  └─────────────────┘  └──────────────────┘  └─────────────────┘  │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
