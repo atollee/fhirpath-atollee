@@ -105,6 +105,18 @@ const FHIRPATH_FUNCTIONS = [
   { name: 'today', signature: 'today()', description: 'Current date' },
 ];
 
+// Detect iOS/mobile devices where Monaco doesn't work properly
+function isMobileDevice(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  // iOS devices (iPhone, iPad, iPod) - all iOS browsers use WebKit
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  // Android mobile (not tablets with keyboards)
+  const isAndroidMobile = /Android/.test(ua) && /Mobile/.test(ua);
+  return isIOS || isAndroidMobile;
+}
+
 export function MonacoEditor({ 
   value, 
   onChange, 
@@ -119,8 +131,15 @@ export function MonacoEditor({
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [editorHeight, setEditorHeight] = useState(minHeight);
+  const [isMobile] = useState(() => isMobileDevice());
 
   useEffect(() => {
+    // Skip Monaco loading on mobile devices - Monaco doesn't work on iOS
+    if (isMobile) {
+      setIsLoading(false);
+      return;
+    }
+
     const loadMonaco = async () => {
       try {
         if ((globalThis as unknown as { monaco?: Monaco }).monaco) {
@@ -278,15 +297,26 @@ export function MonacoEditor({
     }
   }, [value]);
 
-  if (loadError) {
+  // Fallback for mobile devices (iOS/Android) or load errors
+  // Monaco Editor doesn't work properly on mobile - shows broken canvas/cursor artifacts
+  if (loadError || isMobile) {
     return (
-      <input
-        type="text"
-        value={value}
-        onInput={(e) => onChange((e.target as HTMLInputElement).value)}
-        class="w-full px-3 py-2 font-mono text-sm border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100"
-        placeholder="Enter FHIRPath expression..."
-      />
+      <div class="relative">
+        <textarea
+          value={value}
+          onInput={(e) => onChange((e.target as HTMLTextAreaElement).value)}
+          onKeyDown={(e) => {
+            if (onSubmit && (e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+              e.preventDefault();
+              onSubmit();
+            }
+          }}
+          class="w-full px-3 py-2 font-mono text-sm border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 resize-none focus:outline-none focus:ring-1 focus:ring-[rgb(30,210,255)] focus:border-transparent"
+          style={{ minHeight: `${minHeight}px`, maxHeight: `${maxHeight}px` }}
+          placeholder="Enter FHIRPath expression..."
+          rows={1}
+        />
+      </div>
     );
   }
 
