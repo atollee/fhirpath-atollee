@@ -538,7 +538,7 @@ export default function PlaygroundIsland({
                 onClick={() => { setShowExpressionBrowser(!showExpressionBrowser); setShowHistory(false); setShowFavorites(false); }}
                 class="px-2 py-0.5 text-xs bg-atollee-ocean/10 dark:bg-atollee-sea/20 text-atollee-ocean dark:text-atollee-sea rounded hover:bg-atollee-ocean/20 dark:hover:bg-atollee-sea/30 transition-colors whitespace-nowrap font-medium"
               >
-                📚 {lang === "de" ? "Alle Funktionen" : "All Functions"} {showExpressionBrowser ? "▲" : "▼"}
+                📚 {lang === "de" ? "Ausdrücke nach Kategorie" : "Expressions by Category"} {showExpressionBrowser ? "▲" : "▼"}
               </button>
             </div>
             {/* Expression Browser Panel - appears below sample buttons */}
