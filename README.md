@@ -80,19 +80,18 @@ The standard `fhirpath.js` library (HL7/fhirpath.js) is the reference implementa
 | `inspect()` | ❌ | ✅ | atollee extension - debugging |
 | `registry` | ❌ | ✅ | atollee extension - introspection |
 
-### Performance Comparison
+### Performance Comparison (JIT)
 
-| Scenario | fhirpath.js 4.8.3 | fhirpath-atollee | Speedup |
-|----------|-------------------|------------------|---------|
-| Simple path (`name.given`) | ~6.6 µs | ~1.4 µs | **~5x** |
-| Dotted path (`name.family`) | ~5.3 µs | ~1.7 µs | **~3x** |
-| Where clause (filter) | ~18.9 µs | ~1.4 µs | **~13x** |
-| Chained methods | ~9.5 µs | ~1.1 µs | **~8x** |
-| Complex expression | ~31.5 µs | ~2.1 µs | **~15x** |
-| Batch 100 patients | ~427 µs | ~111 µs | **~4x** |
-| Compiled (100 patients) | ~57 µs | ~22 µs | **~2.5x** |
+| Scenario | fhirpath.js 4.8.3 | fhirpath-atollee JIT | Speedup |
+|----------|-------------------|----------------------|---------|
+| Simple path (`name.given`) | ~5.9 µs | ~116 ns | **~51x** |
+| Where clause (filter) | ~15.1 µs | ~278 ns | **~54x** |
+| Chained methods | ~9.3 µs | ~118 ns | **~79x** |
+| Complex expression | ~32.0 µs | ~735 ns | **~44x** |
+| Batch 100 patients | ~427 µs | ~6.6 µs | **~64x** |
+| Large batch 1000 patients | ~4.21 ms | ~54 µs | **~78x** |
 
-**Average Speedup: ~8x faster** than fhirpath.js
+**Average Speedup: ~57x faster** than fhirpath.js
 
 *Benchmarks on Apple M3 Max, Deno 2.6.7, single-threaded. Values vary ±20% between runs. Run `deno task bench` for current measurements.*
 
@@ -1297,8 +1296,8 @@ deno test -A --coverage packages/fhirpath-atollee/tests/
 ### Completed (v0.7.0) - Januar 2026
 - [x] JIT Compiler for Maximum Performance
   - Compiles FHIRPath AST to native JavaScript
-  - **Up to 25x faster** than fhirpath.js (12x average)
-  - **2x faster** than interpreted atollee
+  - **Up to 78x faster** than fhirpath.js (57x average)
+  - 100% JIT coverage for all FHIRPath functions
   - Cached compilation for repeated use
 - [x] Monaco Editor Extension
   - Syntax highlighting with Monarch tokenizer
