@@ -456,6 +456,124 @@ const ${resultVar} = (() => {
         return this.generateChildren(objectVar, lines);
       case "descendants":
         return this.generateDescendants(objectVar, lines);
+      // Aggregate functions
+      case "sum":
+        return this.generateSum(objectVar, lines);
+      case "min":
+        return this.generateMin(objectVar, lines);
+      case "max":
+        return this.generateMax(objectVar, lines);
+      case "avg":
+        return this.generateAvg(objectVar, lines);
+      // Existence functions
+      case "allTrue":
+        return this.generateAllTrue(objectVar, lines);
+      case "anyTrue":
+        return this.generateAnyTrue(objectVar, lines);
+      case "allFalse":
+        return this.generateAllFalse(objectVar, lines);
+      case "anyFalse":
+        return this.generateAnyFalse(objectVar, lines);
+      case "isDistinct":
+        return this.generateIsDistinct(objectVar, lines);
+      case "subsetOf":
+        return this.generateSubsetOf(node, objectVar, inputVar, lines, options);
+      case "supersetOf":
+        return this.generateSupersetOf(node, objectVar, inputVar, lines, options);
+      // Math functions
+      case "abs":
+        return this.generateMathSingle(objectVar, lines, "abs", "Math.abs");
+      case "ceiling":
+        return this.generateMathSingle(objectVar, lines, "ceil", "Math.ceil");
+      case "floor":
+        return this.generateMathSingle(objectVar, lines, "floor", "Math.floor");
+      case "round":
+        return this.generateRound(node, objectVar, inputVar, lines, options);
+      case "truncate":
+        return this.generateMathSingle(objectVar, lines, "trunc", "Math.trunc");
+      case "sqrt":
+        return this.generateMathSingle(objectVar, lines, "sqrt", "Math.sqrt");
+      case "exp":
+        return this.generateMathSingle(objectVar, lines, "exp", "Math.exp");
+      case "ln":
+        return this.generateMathSingle(objectVar, lines, "ln", "Math.log");
+      case "log":
+        return this.generateLog(node, objectVar, inputVar, lines, options);
+      case "power":
+        return this.generatePower(node, objectVar, inputVar, lines, options);
+      // String functions
+      case "toChars":
+        return this.generateToChars(objectVar, lines);
+      case "replaceMatches":
+        return this.generateReplaceMatches(node, objectVar, inputVar, lines, options);
+      // Type conversion
+      case "toDate":
+        return this.generateToDate(objectVar, lines);
+      case "toDateTime":
+        return this.generateToDateTime(objectVar, lines);
+      case "toTime":
+        return this.generateToTime(objectVar, lines);
+      // FHIR-specific
+      case "extension":
+        return this.generateExtension(node, objectVar, inputVar, lines, options);
+      case "hasExtension":
+        return this.generateHasExtension(node, objectVar, inputVar, lines, options);
+      case "getValue":
+        return this.generateGetValue(objectVar, lines);
+      case "htmlChecks":
+        return this.generateHtmlChecks(objectVar, lines);
+      // Type conversion checks
+      case "convertsToString":
+        return this.generateConvertsTo(objectVar, lines, "String");
+      case "convertsToInteger":
+        return this.generateConvertsTo(objectVar, lines, "Integer");
+      case "convertsToDecimal":
+        return this.generateConvertsTo(objectVar, lines, "Decimal");
+      case "convertsToBoolean":
+        return this.generateConvertsTo(objectVar, lines, "Boolean");
+      case "convertsToDate":
+        return this.generateConvertsTo(objectVar, lines, "Date");
+      case "convertsToDateTime":
+        return this.generateConvertsTo(objectVar, lines, "DateTime");
+      case "convertsToTime":
+        return this.generateConvertsTo(objectVar, lines, "Time");
+      case "convertsToQuantity":
+        return this.generateConvertsTo(objectVar, lines, "Quantity");
+      // Quantity conversion
+      case "toQuantity":
+        return this.generateToQuantity(node, objectVar, inputVar, lines, options);
+      // Encoding/Decoding
+      case "encode":
+        return this.generateEncode(node, objectVar, inputVar, lines, options);
+      case "decode":
+        return this.generateDecode(node, objectVar, inputVar, lines, options);
+      // Utility
+      case "trace":
+        return this.generateTrace(node, objectVar, inputVar, lines, options);
+      // Type functions as methods
+      case "as":
+        return this.generateAsMethod(node, objectVar, lines);
+      case "is":
+        return this.generateIsMethod(node, objectVar, lines);
+      // Aggregate
+      case "aggregate":
+        return this.generateAggregate(node, objectVar, inputVar, lines, options);
+      // Advanced functions
+      case "type":
+        return this.generateType(objectVar, lines);
+      case "defineVariable":
+        return this.generateDefineVariable(node, objectVar, inputVar, lines, options);
+      case "resolve":
+        return this.generateResolve(objectVar, lines);
+      case "memberOf":
+        return this.generateMemberOf(node, objectVar, inputVar, lines, options);
+      // Date/time as methods (in addition to functions)
+      case "now":
+        return this.generateNow(lines);
+      case "today":
+        return this.generateToday(lines);
+      case "timeOfDay":
+        return this.generateTimeOfDay(lines);
       default:
         // Fall back to runtime for complex/uncommon methods
         return this.generateRuntimeMethodCall(node, objectVar, inputVar, lines, options);
@@ -1258,6 +1376,948 @@ const ${resultVar} = (() => {
     lines.push(`  }`);
     lines.push(`}`);
     
+    return resultVar;
+  }
+
+  // ============================================
+  // Aggregate Functions
+  // ============================================
+
+  /**
+   * Generate sum()
+   */
+  private generateSum(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("sum");
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar}).filter(x => typeof x === 'number');`);
+    lines.push(`const ${resultVar} = ${resultVar}_arr.length > 0 ? ${resultVar}_arr.reduce((a, b) => a + b, 0) : undefined;`);
+    return resultVar;
+  }
+
+  /**
+   * Generate min()
+   */
+  private generateMin(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("min");
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`let ${resultVar} = undefined;`);
+    lines.push(`if (${resultVar}_arr.length > 0) {`);
+    lines.push(`  ${resultVar} = ${resultVar}_arr[0];`);
+    lines.push(`  for (let i = 1; i < ${resultVar}_arr.length; i++) {`);
+    lines.push(`    if (${resultVar}_arr[i] < ${resultVar}) ${resultVar} = ${resultVar}_arr[i];`);
+    lines.push(`  }`);
+    lines.push(`}`);
+    return resultVar;
+  }
+
+  /**
+   * Generate max()
+   */
+  private generateMax(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("max");
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`let ${resultVar} = undefined;`);
+    lines.push(`if (${resultVar}_arr.length > 0) {`);
+    lines.push(`  ${resultVar} = ${resultVar}_arr[0];`);
+    lines.push(`  for (let i = 1; i < ${resultVar}_arr.length; i++) {`);
+    lines.push(`    if (${resultVar}_arr[i] > ${resultVar}) ${resultVar} = ${resultVar}_arr[i];`);
+    lines.push(`  }`);
+    lines.push(`}`);
+    return resultVar;
+  }
+
+  /**
+   * Generate avg()
+   */
+  private generateAvg(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("avg");
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar}).filter(x => typeof x === 'number');`);
+    lines.push(`const ${resultVar} = ${resultVar}_arr.length > 0 ? ${resultVar}_arr.reduce((a, b) => a + b, 0) / ${resultVar}_arr.length : undefined;`);
+    return resultVar;
+  }
+
+  // ============================================
+  // Existence Functions
+  // ============================================
+
+  /**
+   * Generate allTrue()
+   */
+  private generateAllTrue(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("allTrue");
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`const ${resultVar} = ${resultVar}_arr.length > 0 && ${resultVar}_arr.every(x => x === true);`);
+    return resultVar;
+  }
+
+  /**
+   * Generate anyTrue()
+   */
+  private generateAnyTrue(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("anyTrue");
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`const ${resultVar} = ${resultVar}_arr.some(x => x === true);`);
+    return resultVar;
+  }
+
+  /**
+   * Generate allFalse()
+   */
+  private generateAllFalse(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("allFalse");
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`const ${resultVar} = ${resultVar}_arr.length > 0 && ${resultVar}_arr.every(x => x === false);`);
+    return resultVar;
+  }
+
+  /**
+   * Generate anyFalse()
+   */
+  private generateAnyFalse(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("anyFalse");
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`const ${resultVar} = ${resultVar}_arr.some(x => x === false);`);
+    return resultVar;
+  }
+
+  /**
+   * Generate isDistinct()
+   */
+  private generateIsDistinct(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("isDistinct");
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`const ${resultVar}_set = new Set(${resultVar}_arr.map(x => JSON.stringify(x)));`);
+    lines.push(`const ${resultVar} = ${resultVar}_set.size === ${resultVar}_arr.length;`);
+    return resultVar;
+  }
+
+  /**
+   * Generate subsetOf()
+   */
+  private generateSubsetOf(
+    node: MethodCallNode,
+    objectVar: string,
+    inputVar: string,
+    lines: string[],
+    options: JITOptions
+  ): string {
+    const resultVar = this.newVar("subsetOf");
+    
+    if (node.arguments.length === 0) {
+      lines.push(`const ${resultVar} = true;`);
+      return resultVar;
+    }
+
+    const otherVar = this.generateNode(node.arguments[0], inputVar, lines, options);
+    
+    lines.push(`const ${resultVar}_other = new Set(toArray(${otherVar}).map(x => JSON.stringify(x)));`);
+    lines.push(`const ${resultVar} = toArray(${objectVar}).every(x => ${resultVar}_other.has(JSON.stringify(x)));`);
+    
+    return resultVar;
+  }
+
+  /**
+   * Generate supersetOf()
+   */
+  private generateSupersetOf(
+    node: MethodCallNode,
+    objectVar: string,
+    inputVar: string,
+    lines: string[],
+    options: JITOptions
+  ): string {
+    const resultVar = this.newVar("supersetOf");
+    
+    if (node.arguments.length === 0) {
+      lines.push(`const ${resultVar} = true;`);
+      return resultVar;
+    }
+
+    const otherVar = this.generateNode(node.arguments[0], inputVar, lines, options);
+    
+    lines.push(`const ${resultVar}_self = new Set(toArray(${objectVar}).map(x => JSON.stringify(x)));`);
+    lines.push(`const ${resultVar} = toArray(${otherVar}).every(x => ${resultVar}_self.has(JSON.stringify(x)));`);
+    
+    return resultVar;
+  }
+
+  // ============================================
+  // Math Functions
+  // ============================================
+
+  /**
+   * Generate single-argument math function
+   */
+  private generateMathSingle(objectVar: string, lines: string[], name: string, jsFunc: string): string {
+    const resultVar = this.newVar(name);
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`const ${resultVar} = ${resultVar}_arr.length === 1 && typeof ${resultVar}_arr[0] === 'number' ? ${jsFunc}(${resultVar}_arr[0]) : undefined;`);
+    return resultVar;
+  }
+
+  /**
+   * Generate round() with optional precision
+   */
+  private generateRound(
+    node: MethodCallNode,
+    objectVar: string,
+    inputVar: string,
+    lines: string[],
+    options: JITOptions
+  ): string {
+    const resultVar = this.newVar("round");
+    
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    
+    if (node.arguments.length > 0) {
+      const precisionVar = this.generateNode(node.arguments[0], inputVar, lines, options);
+      lines.push(`const ${resultVar}_prec = toArray(${precisionVar})[0] || 0;`);
+      lines.push(`const ${resultVar}_factor = Math.pow(10, ${resultVar}_prec);`);
+      lines.push(`const ${resultVar} = ${resultVar}_arr.length === 1 && typeof ${resultVar}_arr[0] === 'number' ? Math.round(${resultVar}_arr[0] * ${resultVar}_factor) / ${resultVar}_factor : undefined;`);
+    } else {
+      lines.push(`const ${resultVar} = ${resultVar}_arr.length === 1 && typeof ${resultVar}_arr[0] === 'number' ? Math.round(${resultVar}_arr[0]) : undefined;`);
+    }
+    
+    return resultVar;
+  }
+
+  /**
+   * Generate log() with base
+   */
+  private generateLog(
+    node: MethodCallNode,
+    objectVar: string,
+    inputVar: string,
+    lines: string[],
+    options: JITOptions
+  ): string {
+    const resultVar = this.newVar("log");
+    
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    
+    if (node.arguments.length > 0) {
+      const baseVar = this.generateNode(node.arguments[0], inputVar, lines, options);
+      lines.push(`const ${resultVar}_base = toArray(${baseVar})[0];`);
+      lines.push(`const ${resultVar} = ${resultVar}_arr.length === 1 && typeof ${resultVar}_arr[0] === 'number' && typeof ${resultVar}_base === 'number' ? Math.log(${resultVar}_arr[0]) / Math.log(${resultVar}_base) : undefined;`);
+    } else {
+      lines.push(`const ${resultVar} = ${resultVar}_arr.length === 1 && typeof ${resultVar}_arr[0] === 'number' ? Math.log10(${resultVar}_arr[0]) : undefined;`);
+    }
+    
+    return resultVar;
+  }
+
+  /**
+   * Generate power()
+   */
+  private generatePower(
+    node: MethodCallNode,
+    objectVar: string,
+    inputVar: string,
+    lines: string[],
+    options: JITOptions
+  ): string {
+    const resultVar = this.newVar("power");
+    
+    if (node.arguments.length === 0) {
+      lines.push(`const ${resultVar} = undefined;`);
+      return resultVar;
+    }
+
+    const expVar = this.generateNode(node.arguments[0], inputVar, lines, options);
+    
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`const ${resultVar}_exp = toArray(${expVar})[0];`);
+    lines.push(`const ${resultVar} = ${resultVar}_arr.length === 1 && typeof ${resultVar}_arr[0] === 'number' && typeof ${resultVar}_exp === 'number' ? Math.pow(${resultVar}_arr[0], ${resultVar}_exp) : undefined;`);
+    
+    return resultVar;
+  }
+
+  // ============================================
+  // String Functions
+  // ============================================
+
+  /**
+   * Generate toChars()
+   */
+  private generateToChars(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("toChars");
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`const ${resultVar} = ${resultVar}_arr.length === 1 && typeof ${resultVar}_arr[0] === 'string' ? [...${resultVar}_arr[0]] : [];`);
+    return resultVar;
+  }
+
+  /**
+   * Generate replaceMatches()
+   */
+  private generateReplaceMatches(
+    node: MethodCallNode,
+    objectVar: string,
+    inputVar: string,
+    lines: string[],
+    options: JITOptions
+  ): string {
+    const resultVar = this.newVar("replMatch");
+    
+    if (node.arguments.length < 2) {
+      lines.push(`const ${resultVar} = toArray(${objectVar})[0];`);
+      return resultVar;
+    }
+
+    const patternVar = this.generateNode(node.arguments[0], inputVar, lines, options);
+    const replacementVar = this.generateNode(node.arguments[1], inputVar, lines, options);
+    
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`const ${resultVar}_pat = toArray(${patternVar})[0];`);
+    lines.push(`const ${resultVar}_rep = toArray(${replacementVar})[0] || '';`);
+    lines.push(`let ${resultVar} = undefined;`);
+    lines.push(`if (${resultVar}_arr.length === 1 && typeof ${resultVar}_arr[0] === 'string' && typeof ${resultVar}_pat === 'string') {`);
+    lines.push(`  try { ${resultVar} = ${resultVar}_arr[0].replace(new RegExp(${resultVar}_pat, 'g'), ${resultVar}_rep); } catch(e) { ${resultVar} = ${resultVar}_arr[0]; }`);
+    lines.push(`}`);
+    
+    return resultVar;
+  }
+
+  // ============================================
+  // Type Conversion Functions
+  // ============================================
+
+  /**
+   * Generate toDate()
+   */
+  private generateToDate(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("toDate");
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`let ${resultVar} = undefined;`);
+    lines.push(`if (${resultVar}_arr.length === 1) {`);
+    lines.push(`  const v = ${resultVar}_arr[0];`);
+    lines.push(`  if (typeof v === 'string') {`);
+    lines.push(`    const match = v.match(/^(\\d{4})(-\\d{2})?(-\\d{2})?/);`);
+    lines.push(`    if (match) ${resultVar} = match[0];`);
+    lines.push(`  }`);
+    lines.push(`}`);
+    return resultVar;
+  }
+
+  /**
+   * Generate toDateTime()
+   */
+  private generateToDateTime(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("toDateTime");
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`let ${resultVar} = undefined;`);
+    lines.push(`if (${resultVar}_arr.length === 1) {`);
+    lines.push(`  const v = ${resultVar}_arr[0];`);
+    lines.push(`  if (typeof v === 'string') {`);
+    lines.push(`    const d = new Date(v);`);
+    lines.push(`    if (!isNaN(d.getTime())) ${resultVar} = d.toISOString();`);
+    lines.push(`  }`);
+    lines.push(`}`);
+    return resultVar;
+  }
+
+  /**
+   * Generate toTime()
+   */
+  private generateToTime(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("toTime");
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`let ${resultVar} = undefined;`);
+    lines.push(`if (${resultVar}_arr.length === 1) {`);
+    lines.push(`  const v = ${resultVar}_arr[0];`);
+    lines.push(`  if (typeof v === 'string') {`);
+    lines.push(`    const match = v.match(/T?(\\d{2}:\\d{2}(:\\d{2})?)/);`);
+    lines.push(`    if (match) ${resultVar} = match[1];`);
+    lines.push(`  }`);
+    lines.push(`}`);
+    return resultVar;
+  }
+
+  // ============================================
+  // FHIR-specific Functions
+  // ============================================
+
+  /**
+   * Generate extension()
+   */
+  private generateExtension(
+    node: MethodCallNode,
+    objectVar: string,
+    inputVar: string,
+    lines: string[],
+    options: JITOptions
+  ): string {
+    const resultVar = this.newVar("ext");
+    
+    if (node.arguments.length === 0) {
+      lines.push(`const ${resultVar} = [];`);
+      return resultVar;
+    }
+
+    const urlVar = this.generateNode(node.arguments[0], inputVar, lines, options);
+    
+    lines.push(`const ${resultVar}_url = toArray(${urlVar})[0];`);
+    lines.push(`const ${resultVar} = [];`);
+    lines.push(`for (const item of toArray(${objectVar})) {`);
+    lines.push(`  if (item?.extension) {`);
+    lines.push(`    for (const ext of toArray(item.extension)) {`);
+    lines.push(`      if (ext?.url === ${resultVar}_url) ${resultVar}.push(ext);`);
+    lines.push(`    }`);
+    lines.push(`  }`);
+    lines.push(`}`);
+    
+    return resultVar;
+  }
+
+  /**
+   * Generate hasExtension()
+   */
+  private generateHasExtension(
+    node: MethodCallNode,
+    objectVar: string,
+    inputVar: string,
+    lines: string[],
+    options: JITOptions
+  ): string {
+    const resultVar = this.newVar("hasExt");
+    
+    if (node.arguments.length === 0) {
+      lines.push(`const ${resultVar} = false;`);
+      return resultVar;
+    }
+
+    const urlVar = this.generateNode(node.arguments[0], inputVar, lines, options);
+    
+    lines.push(`const ${resultVar}_url = toArray(${urlVar})[0];`);
+    lines.push(`let ${resultVar} = false;`);
+    lines.push(`for (const item of toArray(${objectVar})) {`);
+    lines.push(`  if (item?.extension) {`);
+    lines.push(`    for (const ext of toArray(item.extension)) {`);
+    lines.push(`      if (ext?.url === ${resultVar}_url) { ${resultVar} = true; break; }`);
+    lines.push(`    }`);
+    lines.push(`  }`);
+    lines.push(`  if (${resultVar}) break;`);
+    lines.push(`}`);
+    
+    return resultVar;
+  }
+
+  /**
+   * Generate getValue() - FHIR value[x] pattern
+   */
+  private generateGetValue(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("getValue");
+    const valueProps = ['valueString', 'valueInteger', 'valueDecimal', 'valueBoolean', 
+      'valueDate', 'valueDateTime', 'valueTime', 'valueCode', 'valueCoding', 
+      'valueQuantity', 'valueReference', 'valueIdentifier', 'valueCodeableConcept',
+      'valueUri', 'valueUrl', 'valueCanonical', 'valueBase64Binary', 'valueInstant',
+      'valueOid', 'valueUuid', 'valueId', 'valueMarkdown', 'valueUnsignedInt',
+      'valuePositiveInt', 'valueAddress', 'valueAge', 'valueAnnotation', 
+      'valueAttachment', 'valueContactPoint', 'valueCount', 'valueDistance',
+      'valueDuration', 'valueHumanName', 'valueMoney', 'valuePeriod', 'valueRange',
+      'valueRatio', 'valueSampledData', 'valueSignature', 'valueTiming'];
+    
+    lines.push(`const ${resultVar} = [];`);
+    lines.push(`for (const item of toArray(${objectVar})) {`);
+    lines.push(`  if (item != null && typeof item === 'object') {`);
+    for (const prop of valueProps) {
+      lines.push(`    if (item.${prop} !== undefined) { ${resultVar}.push(item.${prop}); continue; }`);
+    }
+    lines.push(`  }`);
+    lines.push(`}`);
+    
+    return resultVar;
+  }
+
+  /**
+   * Generate htmlChecks() - basic XHTML validation
+   */
+  private generateHtmlChecks(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("htmlChecks");
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`let ${resultVar} = true;`);
+    lines.push(`for (const item of ${resultVar}_arr) {`);
+    lines.push(`  if (typeof item === 'string') {`);
+    lines.push(`    // Basic checks: no scripts, no events`);
+    lines.push(`    if (/<script/i.test(item) || /on\\w+\\s*=/i.test(item)) {`);
+    lines.push(`      ${resultVar} = false; break;`);
+    lines.push(`    }`);
+    lines.push(`  }`);
+    lines.push(`}`);
+    return resultVar;
+  }
+
+  /**
+   * Generate convertsTo*() functions
+   */
+  private generateConvertsTo(objectVar: string, lines: string[], targetType: string): string {
+    const resultVar = this.newVar("convertsTo" + targetType);
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`let ${resultVar} = ${resultVar}_arr.length === 1;`);
+    lines.push(`if (${resultVar}) {`);
+    lines.push(`  const v = ${resultVar}_arr[0];`);
+    
+    switch (targetType) {
+      case "String":
+        lines.push(`  ${resultVar} = v != null;`);
+        break;
+      case "Integer":
+        lines.push(`  if (typeof v === 'number') ${resultVar} = Number.isInteger(v);`);
+        lines.push(`  else if (typeof v === 'string') ${resultVar} = /^-?\\d+$/.test(v);`);
+        lines.push(`  else if (typeof v === 'boolean') ${resultVar} = true;`);
+        lines.push(`  else ${resultVar} = false;`);
+        break;
+      case "Decimal":
+        lines.push(`  if (typeof v === 'number') ${resultVar} = !isNaN(v);`);
+        lines.push(`  else if (typeof v === 'string') ${resultVar} = !isNaN(parseFloat(v));`);
+        lines.push(`  else if (typeof v === 'boolean') ${resultVar} = true;`);
+        lines.push(`  else ${resultVar} = false;`);
+        break;
+      case "Boolean":
+        lines.push(`  if (typeof v === 'boolean') ${resultVar} = true;`);
+        lines.push(`  else if (typeof v === 'string') ${resultVar} = ['true', 'false', '1', '0', 'yes', 'no'].includes(v.toLowerCase());`);
+        lines.push(`  else if (typeof v === 'number') ${resultVar} = v === 0 || v === 1;`);
+        lines.push(`  else ${resultVar} = false;`);
+        break;
+      case "Date":
+        lines.push(`  if (typeof v === 'string') ${resultVar} = /^\\d{4}(-\\d{2}(-\\d{2})?)?$/.test(v);`);
+        lines.push(`  else ${resultVar} = false;`);
+        break;
+      case "DateTime":
+        lines.push(`  if (typeof v === 'string') {`);
+        lines.push(`    const d = new Date(v);`);
+        lines.push(`    ${resultVar} = !isNaN(d.getTime());`);
+        lines.push(`  } else ${resultVar} = false;`);
+        break;
+      case "Time":
+        lines.push(`  if (typeof v === 'string') ${resultVar} = /^\\d{2}:\\d{2}(:\\d{2}(\\.\\d+)?)?$/.test(v);`);
+        lines.push(`  else ${resultVar} = false;`);
+        break;
+      case "Quantity":
+        lines.push(`  if (typeof v === 'number') ${resultVar} = true;`);
+        lines.push(`  else if (typeof v === 'object' && v?.value !== undefined) ${resultVar} = true;`);
+        lines.push(`  else if (typeof v === 'string') ${resultVar} = /^-?\\d+(\\.\\d+)?\\s*'[^']*'$/.test(v) || /^-?\\d+(\\.\\d+)?$/.test(v);`);
+        lines.push(`  else ${resultVar} = false;`);
+        break;
+    }
+    
+    lines.push(`}`);
+    return resultVar;
+  }
+
+  /**
+   * Generate toQuantity()
+   */
+  private generateToQuantity(
+    node: MethodCallNode,
+    objectVar: string,
+    inputVar: string,
+    lines: string[],
+    options: JITOptions
+  ): string {
+    const resultVar = this.newVar("toQuantity");
+    
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`let ${resultVar} = undefined;`);
+    lines.push(`if (${resultVar}_arr.length === 1) {`);
+    lines.push(`  const v = ${resultVar}_arr[0];`);
+    lines.push(`  if (typeof v === 'number') {`);
+    
+    if (node.arguments.length > 0) {
+      const unitVar = this.generateNode(node.arguments[0], inputVar, lines, options);
+      lines.push(`    const unit = toArray(${unitVar})[0] || '1';`);
+      lines.push(`    ${resultVar} = { value: v, unit: unit };`);
+    } else {
+      lines.push(`    ${resultVar} = { value: v, unit: '1' };`);
+    }
+    
+    lines.push(`  } else if (typeof v === 'object' && v?.value !== undefined) {`);
+    lines.push(`    ${resultVar} = v;`);
+    lines.push(`  } else if (typeof v === 'string') {`);
+    lines.push(`    const match = v.match(/^(-?\\d+(?:\\.\\d+)?)\\s*'([^']*)'$/);`);
+    lines.push(`    if (match) ${resultVar} = { value: parseFloat(match[1]), unit: match[2] };`);
+    lines.push(`    else if (/^-?\\d+(\\.\\d+)?$/.test(v)) ${resultVar} = { value: parseFloat(v), unit: '1' };`);
+    lines.push(`  }`);
+    lines.push(`}`);
+    
+    return resultVar;
+  }
+
+  /**
+   * Generate encode()
+   */
+  private generateEncode(
+    node: MethodCallNode,
+    objectVar: string,
+    inputVar: string,
+    lines: string[],
+    options: JITOptions
+  ): string {
+    const resultVar = this.newVar("encode");
+    
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`let ${resultVar} = undefined;`);
+    lines.push(`if (${resultVar}_arr.length === 1 && typeof ${resultVar}_arr[0] === 'string') {`);
+    
+    if (node.arguments.length > 0) {
+      const encodingVar = this.generateNode(node.arguments[0], inputVar, lines, options);
+      lines.push(`  const encoding = toArray(${encodingVar})[0] || 'base64';`);
+      lines.push(`  const str = ${resultVar}_arr[0];`);
+      lines.push(`  if (encoding === 'base64') {`);
+      lines.push(`    try { ${resultVar} = btoa(unescape(encodeURIComponent(str))); } catch(e) {}`);
+      lines.push(`  } else if (encoding === 'urlbase64') {`);
+      lines.push(`    try { ${resultVar} = btoa(unescape(encodeURIComponent(str))).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, ''); } catch(e) {}`);
+      lines.push(`  } else if (encoding === 'hex') {`);
+      lines.push(`    ${resultVar} = [...str].map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('');`);
+      lines.push(`  }`);
+    } else {
+      lines.push(`  try { ${resultVar} = btoa(unescape(encodeURIComponent(${resultVar}_arr[0]))); } catch(e) {}`);
+    }
+    
+    lines.push(`}`);
+    return resultVar;
+  }
+
+  /**
+   * Generate decode()
+   */
+  private generateDecode(
+    node: MethodCallNode,
+    objectVar: string,
+    inputVar: string,
+    lines: string[],
+    options: JITOptions
+  ): string {
+    const resultVar = this.newVar("decode");
+    
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`let ${resultVar} = undefined;`);
+    lines.push(`if (${resultVar}_arr.length === 1 && typeof ${resultVar}_arr[0] === 'string') {`);
+    
+    if (node.arguments.length > 0) {
+      const encodingVar = this.generateNode(node.arguments[0], inputVar, lines, options);
+      lines.push(`  const encoding = toArray(${encodingVar})[0] || 'base64';`);
+      lines.push(`  const str = ${resultVar}_arr[0];`);
+      lines.push(`  if (encoding === 'base64') {`);
+      lines.push(`    try { ${resultVar} = decodeURIComponent(escape(atob(str))); } catch(e) {}`);
+      lines.push(`  } else if (encoding === 'urlbase64') {`);
+      lines.push(`    try { let s = str.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; ${resultVar} = decodeURIComponent(escape(atob(s))); } catch(e) {}`);
+      lines.push(`  } else if (encoding === 'hex') {`);
+      lines.push(`    ${resultVar} = str.match(/.{1,2}/g)?.map(b => String.fromCharCode(parseInt(b, 16))).join('') || '';`);
+      lines.push(`  }`);
+    } else {
+      lines.push(`  try { ${resultVar} = decodeURIComponent(escape(atob(${resultVar}_arr[0]))); } catch(e) {}`);
+    }
+    
+    lines.push(`}`);
+    return resultVar;
+  }
+
+  /**
+   * Generate trace() - debugging helper
+   */
+  private generateTrace(
+    node: MethodCallNode,
+    objectVar: string,
+    inputVar: string,
+    lines: string[],
+    options: JITOptions
+  ): string {
+    const resultVar = this.newVar("trace");
+    
+    lines.push(`const ${resultVar} = toArray(${objectVar});`);
+    
+    if (node.arguments.length > 0) {
+      const labelVar = this.generateNode(node.arguments[0], inputVar, lines, options);
+      lines.push(`const ${resultVar}_label = toArray(${labelVar})[0] || 'trace';`);
+      lines.push(`if (options?.traceFn) options.traceFn(${resultVar}, ${resultVar}_label);`);
+    } else {
+      lines.push(`if (options?.traceFn) options.traceFn(${resultVar}, 'trace');`);
+    }
+    
+    return resultVar;
+  }
+
+  /**
+   * Generate as() as a method
+   */
+  private generateAsMethod(node: MethodCallNode, objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("asMethod");
+    
+    if (node.arguments.length === 0) {
+      lines.push(`const ${resultVar} = toArray(${objectVar});`);
+      return resultVar;
+    }
+
+    const typeArg = node.arguments[0];
+    let typeName = "";
+    if (typeArg.type === "Identifier") {
+      typeName = (typeArg as IdentifierNode).name;
+    } else if ((typeArg as any).typeName) {
+      typeName = (typeArg as any).typeName;
+    } else if ((typeArg as any).name) {
+      typeName = (typeArg as any).name;
+    }
+
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`let ${resultVar} = undefined;`);
+    lines.push(`if (${resultVar}_arr.length === 1) {`);
+    lines.push(`  const val = ${resultVar}_arr[0];`);
+    lines.push(`  const isType = (typeof val === 'object' && val?.resourceType === ${JSON.stringify(typeName)}) ||`);
+    lines.push(`    (['String'].includes(${JSON.stringify(typeName)}) && typeof val === 'string') ||`);
+    lines.push(`    (['Integer', 'Decimal'].includes(${JSON.stringify(typeName)}) && typeof val === 'number') ||`);
+    lines.push(`    (${JSON.stringify(typeName)} === 'Boolean' && typeof val === 'boolean');`);
+    lines.push(`  if (isType) ${resultVar} = val;`);
+    lines.push(`}`);
+    
+    return resultVar;
+  }
+
+  /**
+   * Generate is() as a method
+   */
+  private generateIsMethod(node: MethodCallNode, objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("isMethod");
+    
+    if (node.arguments.length === 0) {
+      lines.push(`const ${resultVar} = false;`);
+      return resultVar;
+    }
+
+    const typeArg = node.arguments[0];
+    let typeName = "";
+    if (typeArg.type === "Identifier") {
+      typeName = (typeArg as IdentifierNode).name;
+    } else if ((typeArg as any).typeName) {
+      typeName = (typeArg as any).typeName;
+    } else if ((typeArg as any).name) {
+      typeName = (typeArg as any).name;
+    }
+
+    lines.push(`const ${resultVar}_arr = toArray(${objectVar});`);
+    lines.push(`let ${resultVar} = false;`);
+    lines.push(`if (${resultVar}_arr.length === 1) {`);
+    lines.push(`  const val = ${resultVar}_arr[0];`);
+    lines.push(`  if (typeof val === 'object' && val?.resourceType === ${JSON.stringify(typeName)}) ${resultVar} = true;`);
+    lines.push(`  else {`);
+    lines.push(`    const typeMap = { 'string': ['String'], 'number': ['Integer', 'Decimal'], 'boolean': ['Boolean'] };`);
+    lines.push(`    ${resultVar} = (typeMap[typeof val] || []).includes(${JSON.stringify(typeName)});`);
+    lines.push(`  }`);
+    lines.push(`}`);
+    
+    return resultVar;
+  }
+
+  /**
+   * Generate aggregate() - iterates with accumulator
+   */
+  private generateAggregate(
+    node: MethodCallNode,
+    objectVar: string,
+    inputVar: string,
+    lines: string[],
+    options: JITOptions
+  ): string {
+    const resultVar = this.newVar("aggregate");
+    
+    if (node.arguments.length === 0) {
+      lines.push(`const ${resultVar} = undefined;`);
+      return resultVar;
+    }
+
+    const itemVar = this.newVar("aggItem");
+    const indexVar = this.newVar("aggIdx");
+    
+    // Initial value (optional second argument)
+    if (node.arguments.length > 1) {
+      const initVar = this.generateNode(node.arguments[1], inputVar, lines, options);
+      lines.push(`let $$total = toArray(${initVar})[0];`);
+    } else {
+      lines.push(`let $$total = undefined;`);
+    }
+    
+    lines.push(`let ${indexVar} = 0;`);
+    lines.push(`for (const ${itemVar} of toArray(${objectVar})) {`);
+    lines.push(`  const $$this = ${itemVar};`);
+    lines.push(`  const $$index = ${indexVar}++;`);
+    
+    // Generate the aggregation expression
+    const exprVar = this.generateNode(node.arguments[0], itemVar, lines, options);
+    
+    lines.push(`  const ${resultVar}_val = toArray(${exprVar});`);
+    lines.push(`  if (${resultVar}_val.length === 1) $$total = ${resultVar}_val[0];`);
+    lines.push(`}`);
+    lines.push(`const ${resultVar} = $$total;`);
+    
+    return resultVar;
+  }
+
+  /**
+   * Generate type() - returns TypeInfo for each element
+   */
+  private generateType(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("type");
+    lines.push(`const ${resultVar} = [];`);
+    lines.push(`for (const item of toArray(${objectVar})) {`);
+    lines.push(`  if (item == null) continue;`);
+    lines.push(`  let typeName;`);
+    lines.push(`  if (typeof item === 'string') typeName = 'System.String';`);
+    lines.push(`  else if (typeof item === 'number') typeName = Number.isInteger(item) ? 'System.Integer' : 'System.Decimal';`);
+    lines.push(`  else if (typeof item === 'boolean') typeName = 'System.Boolean';`);
+    lines.push(`  else if (typeof item === 'object') {`);
+    lines.push(`    if (item.resourceType) typeName = 'FHIR.' + item.resourceType;`);
+    lines.push(`    else if (item.value !== undefined && item.unit !== undefined) typeName = 'System.Quantity';`);
+    lines.push(`    else typeName = 'System.Any';`);
+    lines.push(`  }`);
+    lines.push(`  if (typeName) ${resultVar}.push({ namespace: typeName.split('.')[0], name: typeName.split('.')[1] || typeName });`);
+    lines.push(`}`);
+    return resultVar;
+  }
+
+  /**
+   * Generate defineVariable() - defines a variable for subsequent expressions
+   */
+  private generateDefineVariable(
+    node: MethodCallNode,
+    objectVar: string,
+    inputVar: string,
+    lines: string[],
+    options: JITOptions
+  ): string {
+    const resultVar = this.newVar("defVar");
+    
+    if (node.arguments.length === 0) {
+      lines.push(`const ${resultVar} = toArray(${objectVar});`);
+      return resultVar;
+    }
+
+    // Get variable name
+    const nameArg = node.arguments[0];
+    let varName = "";
+    if (nameArg.type === "Literal") {
+      varName = String((nameArg as LiteralNode).value);
+    } else if (nameArg.type === "Identifier") {
+      varName = (nameArg as IdentifierNode).name;
+    }
+    
+    // Get variable value (optional second argument, defaults to input)
+    if (node.arguments.length > 1) {
+      const valueVar = this.generateNode(node.arguments[1], objectVar, lines, options);
+      lines.push(`const ${resultVar}_value = toArray(${valueVar});`);
+    } else {
+      lines.push(`const ${resultVar}_value = toArray(${objectVar});`);
+    }
+    
+    // Store in context for later use
+    lines.push(`if (context) context[${JSON.stringify(varName)}] = ${resultVar}_value.length === 1 ? ${resultVar}_value[0] : ${resultVar}_value;`);
+    lines.push(`const ${resultVar} = ${resultVar}_value;`);
+    
+    return resultVar;
+  }
+
+  /**
+   * Generate resolve() - resolves FHIR references
+   * Note: This is a synchronous implementation that looks for references in Bundle entries
+   */
+  private generateResolve(objectVar: string, lines: string[]): string {
+    const resultVar = this.newVar("resolve");
+    lines.push(`const ${resultVar} = [];`);
+    lines.push(`for (const item of toArray(${objectVar})) {`);
+    lines.push(`  if (item == null) continue;`);
+    lines.push(`  // Get reference string`);
+    lines.push(`  let refStr = typeof item === 'string' ? item : item?.reference;`);
+    lines.push(`  if (!refStr) continue;`);
+    lines.push(`  // Check context for %resource (Bundle)`);
+    lines.push(`  const bundle = context?.resource || context?.rootResource;`);
+    lines.push(`  if (bundle?.resourceType === 'Bundle' && bundle?.entry) {`);
+    lines.push(`    for (const entry of bundle.entry) {`);
+    lines.push(`      if (!entry?.resource) continue;`);
+    lines.push(`      const fullUrl = entry.fullUrl || '';`);
+    lines.push(`      const resourceRef = entry.resource.resourceType + '/' + entry.resource.id;`);
+    lines.push(`      if (fullUrl === refStr || resourceRef === refStr || ('urn:uuid:' + entry.resource.id) === refStr) {`);
+    lines.push(`        ${resultVar}.push(entry.resource);`);
+    lines.push(`        break;`);
+    lines.push(`      }`);
+    lines.push(`    }`);
+    lines.push(`  }`);
+    lines.push(`  // Also check for resolver function in context`);
+    lines.push(`  if (${resultVar}.length === 0 && context?.resolver && typeof context.resolver === 'function') {`);
+    lines.push(`    const resolved = context.resolver(refStr);`);
+    lines.push(`    if (resolved) ${resultVar}.push(resolved);`);
+    lines.push(`  }`);
+    lines.push(`}`);
+    return resultVar;
+  }
+
+  /**
+   * Generate memberOf() - checks ValueSet membership
+   * Note: This requires a synchronous memberOf function in context
+   */
+  private generateMemberOf(
+    node: MethodCallNode,
+    objectVar: string,
+    inputVar: string,
+    lines: string[],
+    options: JITOptions
+  ): string {
+    const resultVar = this.newVar("memberOf");
+    
+    if (node.arguments.length === 0) {
+      lines.push(`const ${resultVar} = undefined;`);
+      return resultVar;
+    }
+
+    const valueSetVar = this.generateNode(node.arguments[0], inputVar, lines, options);
+    
+    lines.push(`const ${resultVar}_vs = toArray(${valueSetVar})[0];`);
+    lines.push(`let ${resultVar} = undefined;`);
+    lines.push(`const ${resultVar}_items = toArray(${objectVar});`);
+    lines.push(`if (${resultVar}_items.length === 1 && ${resultVar}_vs) {`);
+    lines.push(`  const item = ${resultVar}_items[0];`);
+    lines.push(`  // Check for memberOf function in context (%terminologies)`);
+    lines.push(`  const terminologies = context?.terminologies || context?.['%terminologies'];`);
+    lines.push(`  if (terminologies?.memberOf && typeof terminologies.memberOf === 'function') {`);
+    lines.push(`    // Extract code from item`);
+    lines.push(`    let code, system;`);
+    lines.push(`    if (typeof item === 'string') {`);
+    lines.push(`      if (item.includes('|')) { [system, code] = item.split('|'); }`);
+    lines.push(`      else code = item;`);
+    lines.push(`    } else if (item?.code) {`);
+    lines.push(`      code = item.code; system = item.system;`);
+    lines.push(`    } else if (item?.coding?.[0]) {`);
+    lines.push(`      code = item.coding[0].code; system = item.coding[0].system;`);
+    lines.push(`    }`);
+    lines.push(`    if (code) {`);
+    lines.push(`      try { ${resultVar} = terminologies.memberOf({ code, system }, ${resultVar}_vs); } catch(e) {}`);
+    lines.push(`    }`);
+    lines.push(`  }`);
+    lines.push(`}`);
+    
+    return resultVar;
+  }
+
+  /**
+   * Generate now() as method
+   */
+  private generateNow(lines: string[]): string {
+    const resultVar = this.newVar("now");
+    lines.push(`const ${resultVar} = new Date().toISOString();`);
+    return resultVar;
+  }
+
+  /**
+   * Generate today() as method
+   */
+  private generateToday(lines: string[]): string {
+    const resultVar = this.newVar("today");
+    lines.push(`const ${resultVar} = new Date().toISOString().split('T')[0];`);
+    return resultVar;
+  }
+
+  /**
+   * Generate timeOfDay() as method
+   */
+  private generateTimeOfDay(lines: string[]): string {
+    const resultVar = this.newVar("timeOfDay");
+    lines.push(`const ${resultVar} = new Date().toISOString().split('T')[1].split('.')[0];`);
     return resultVar;
   }
 
