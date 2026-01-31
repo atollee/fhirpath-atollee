@@ -331,18 +331,26 @@ export default function MonacoEditor({
   // Fallback for mobile devices (iOS/Android) or load errors
   // Monaco Editor doesn't work properly on mobile - shows broken canvas/cursor artifacts
   if (loadError || isMobile) {
+    const handleTextareaInput = (e: Event) => {
+      const textarea = e.target as HTMLTextAreaElement;
+      onChange(textarea.value);
+      // Auto-resize: reset height then set to scrollHeight
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.min(Math.max(textarea.scrollHeight, minHeight), maxHeight)}px`;
+    };
+
     return (
       <div class="relative">
         <textarea
           value={value}
-          onInput={(e) => onChange((e.target as HTMLTextAreaElement).value)}
+          onInput={handleTextareaInput}
           onKeyDown={(e) => {
             if (onSubmit && (e.metaKey || e.ctrlKey) && e.key === "Enter") {
               e.preventDefault();
               onSubmit();
             }
           }}
-          class="w-full px-3 py-2 font-mono text-sm border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 resize-none focus:outline-none focus:ring-1 focus:ring-[rgb(30,210,255)] focus:border-transparent"
+          class="w-full px-3 py-2 font-mono text-sm border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 resize-none focus:outline-none focus:ring-1 focus:ring-[rgb(30,210,255)] focus:border-transparent overflow-hidden"
           style={{ minHeight: `${minHeight}px`, maxHeight: `${maxHeight}px` }}
           placeholder="Enter FHIRPath expression..."
           rows={1}
