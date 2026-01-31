@@ -321,12 +321,21 @@ export default function MonacoEditor({
     }
   }, [isDark, isLoading]);
 
-  // Sync external value changes
+  // Sync external value changes and update height
   useEffect(() => {
     if (editorRef.current && editorRef.current.getValue() !== value) {
       editorRef.current.setValue(value);
+      // Recalculate height after value change
+      setTimeout(() => {
+        if (editorRef.current) {
+          const contentHeight = editorRef.current.getContentHeight();
+          const newHeight = Math.min(Math.max(contentHeight, minHeight), maxHeight);
+          setEditorHeight(newHeight);
+          editorRef.current.layout();
+        }
+      }, 10);
     }
-  }, [value]);
+  }, [value, minHeight, maxHeight]);
 
   // Fallback for mobile devices (iOS/Android) or load errors
   // Monaco Editor doesn't work properly on mobile - shows broken canvas/cursor artifacts
