@@ -307,6 +307,18 @@ export function MonacoEditor({
     }
   }, [value, minHeight, maxHeight]);
 
+  // Mobile textarea ref for auto-resize
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea when value changes (for mobile)
+  useEffect(() => {
+    if ((loadError || isMobile) && textareaRef.current) {
+      const textarea = textareaRef.current;
+      textarea.style.height = 'auto';
+      textarea.style.height = `${Math.min(Math.max(textarea.scrollHeight, minHeight), maxHeight)}px`;
+    }
+  }, [value, loadError, isMobile, minHeight, maxHeight]);
+
   // Fallback for mobile devices (iOS/Android) or load errors
   // Monaco Editor doesn't work properly on mobile - shows broken canvas/cursor artifacts
   if (loadError || isMobile) {
@@ -321,6 +333,7 @@ export function MonacoEditor({
     return (
       <div class="relative">
         <textarea
+          ref={textareaRef}
           value={value}
           onInput={handleTextareaInput}
           onKeyDown={(e) => {
